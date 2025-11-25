@@ -92,7 +92,7 @@ class _tripsScreenState extends State<tripsScreen> {
           // Main Card Container - More circular/rounded
           Container(
             margin: const EdgeInsets.only(top: circleRadius + imageTopOffset),
-            height: cardHeight - circleRadius - imageTopOffset,
+            height: cardHeight - circleRadius - imageTopOffset+20,
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(35),
@@ -142,6 +142,7 @@ class _tripsScreenState extends State<tripsScreen> {
                   _buildDetailRow(price),
                   const SizedBox(height: 12),
                   _buildDetailRow(passengers),
+                  const SizedBox(height: 12),
 
                   const Spacer(),
 
@@ -175,6 +176,7 @@ class _tripsScreenState extends State<tripsScreen> {
                           borderRadius: BorderRadius.circular(25),
                         ),
                       ),
+                      
                       child: const Text(
                         "BOOK NOW",
                         style: TextStyle(

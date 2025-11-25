@@ -56,7 +56,7 @@ class Setting_page extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                   Container(
-                    padding: EdgeInsets.all(16),
+                    padding: EdgeInsets.all(14),
                     alignment: Alignment.center,
                     height: screenHeight * 0.42,
                     decoration: BoxDecoration(
@@ -80,13 +80,13 @@ class Setting_page extends StatelessWidget {
                           child: Column(
                             children: [
                               CircleAvatar(
-                                radius: 70,
+                                radius: 56,
                                 child: Icon(
                                   Icons.person,
                                   size: 70,
                                 ),
                               ),
-                              SizedBox(height: 25),
+                              SizedBox(height: 14),
                               Text(
                                 'Ahmed',
                                 style: TextStyle(
@@ -97,7 +97,7 @@ class Setting_page extends StatelessWidget {
                             ],
                           ),
                         ),
-                        SizedBox(height: 10),
+                       
                         Text(
                           'EMAIL',
                           style: TextStyle(
