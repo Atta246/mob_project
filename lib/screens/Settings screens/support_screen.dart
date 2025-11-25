@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../widgets/custom_bottom_nav.dart';
 import 'Profile_screen.dart';
 import 'contact_us_screen.dart';
+import '../main_screen.dart';
 
 class SupportScreen extends StatelessWidget {
   const SupportScreen({super.key});
@@ -84,16 +85,16 @@ class SupportScreen extends StatelessWidget {
       bottomNavigationBar: CustomBottomNav(
         currentIndex: 2,
         onTap: (index) {
-          switch (index) {
-            case 0:
-              Navigator.popUntil(context, (route) => route.isFirst);
-              break;
-            case 1:
-              Navigator.popUntil(context, (route) => route.isFirst);
-              break;
-            case 2:
-              Navigator.popUntil(context, (route) => route.isFirst);
-              break;
+          if (index == 2) {
+            Navigator.popUntil(context, (route) => route.isFirst);
+          } else {
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(
+                builder: (context) => mainScreen(initialIndex: index),
+              ),
+              (route) => false,
+            );
           }
         },
       ),

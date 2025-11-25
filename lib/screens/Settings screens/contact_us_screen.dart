@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../widgets/custom_bottom_nav.dart';
-import 'Profile_screen.dart';
+import 'Settings_screen.dart';
+import '../main_screen.dart';
 
 class ContactUsScreen extends StatelessWidget {
   const ContactUsScreen({super.key});
@@ -80,7 +81,7 @@ class ContactUsScreen extends StatelessWidget {
           ),
         ],
       ),
-   
+      
     );
   }
 }

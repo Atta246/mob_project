@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../widgets/custom_bottom_nav.dart';
 import 'edit_profile_screen.dart';
 import 'change_password_screen.dart';
+import '../main_screen.dart';
 
 class SettingsDetailScreen extends StatelessWidget {
   const SettingsDetailScreen({super.key});
@@ -83,16 +84,16 @@ class SettingsDetailScreen extends StatelessWidget {
       bottomNavigationBar: CustomBottomNav(
         currentIndex: 2,
         onTap: (index) {
-          switch (index) {
-            case 0:
-              Navigator.popUntil(context, (route) => route.isFirst);
-              break;
-            case 1:
-              Navigator.popUntil(context, (route) => route.isFirst);
-              break;
-            case 2:
-              Navigator.popUntil(context, (route) => route.isFirst);
-              break;
+          if (index == 2) {
+            Navigator.popUntil(context, (route) => route.isFirst);
+          } else {
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(
+                builder: (context) => mainScreen(initialIndex: index),
+              ),
+              (route) => false,
+            );
           }
         },
       ),

@@ -176,23 +176,7 @@ class Setting_page extends StatelessWidget {
         ),
       ),
       
-      bottomNavigationBar: CustomBottomNav(
-        currentIndex: 2,
-        onTap: (index) {
-          // Handle navigation
-          switch (index) {
-            case 0:
-              print('Navigate to Home');
-              break;
-            case 1:
-              print('Navigate to Trips');
-              break;
-            case 2:
-              print('Already on Profile');
-              break;
-          }
-        },
-      ),
+    
     );
     
   }
