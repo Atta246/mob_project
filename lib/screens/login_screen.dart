@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mob_project/screens/main_screen.dart';
 import 'package:mob_project/screens/signup_screen.dart';
 import 'package:mob_project/screens/home_screen.dart';
 
@@ -125,7 +126,7 @@ class _loginScreenState extends State<loginScreen> {
                       Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const HomeScreen(),
+                          builder: (context) => const mainScreen(),
                         ),
                       );
                     },

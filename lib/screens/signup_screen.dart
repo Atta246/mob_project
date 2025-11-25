@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mob_project/screens/home_screen.dart';
+import 'package:mob_project/screens/main_screen.dart';
 
 // ignore: camel_case_types
 class signupScreen extends StatefulWidget {
@@ -133,7 +134,7 @@ class _signupScreenState extends State<signupScreen> {
                       Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const HomeScreen(),
+                          builder: (context) => const mainScreen(),
                         ),
                       );
                     },
