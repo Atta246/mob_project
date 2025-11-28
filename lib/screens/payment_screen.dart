@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mob_project/screens/main_screen.dart';
-import '../widgets/custom_bottom_nav.dart';
+
 
 class PaymentScreen extends StatefulWidget {
   const PaymentScreen({super.key});
@@ -121,22 +121,6 @@ class _PaymentScreenState extends State<PaymentScreen> {
             ),
           ],
         ),
-      ),
-       bottomNavigationBar: CustomBottomNav(
-        currentIndex: 2,
-        onTap: (index) {
-          if (index == 2) {
-            Navigator.popUntil(context, (route) => route.isFirst);
-          } else {
-            Navigator.pushAndRemoveUntil(
-              context,
-              MaterialPageRoute(
-                builder: (context) => mainScreen(initialIndex: index),
-              ),
-              (route) => false,
-            );
-          }
-        },
       ),
     
     );

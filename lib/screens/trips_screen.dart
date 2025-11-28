@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
 
+import 'package:mob_project/screens/trip_details_screen.dart';
+
 class tripsScreen extends StatefulWidget {
   const tripsScreen({super.key});
 
@@ -357,7 +359,10 @@ class _tripsScreenState extends State<tripsScreen>
                     ],
                   ),
                   child: ElevatedButton.icon(
-                    onPressed: () {},
+                    onPressed: () {  Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => TripDetailsPage(tripId: "1")),
+                        ); },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.transparent,
                       shadowColor: Colors.transparent,
