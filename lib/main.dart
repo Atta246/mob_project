@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mob_project/screens/Settings%20screens/Profile_screen.dart';
 import 'package:mob_project/screens/home_screen.dart';
 import 'package:mob_project/screens/login_screen.dart';
 import 'package:mob_project/screens/signup_screen.dart';
@@ -11,12 +12,11 @@ void main() {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'flutter demo',
+      title: 'skyfly',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
