@@ -33,6 +33,7 @@ class _tripsScreenState extends State<tripsScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+     
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
@@ -52,7 +53,7 @@ class _tripsScreenState extends State<tripsScreen>
             children: [
               // Enhanced Header with floating balloons
               Container(
-                height: 200,
+                height: MediaQuery.of(context).size.height*0.825 ,
                 child: Stack(
                   children: [
                     // Animated floating balloons
@@ -65,30 +66,8 @@ class _tripsScreenState extends State<tripsScreen>
                     Positioned.fill(
                       child: Column(
                         children: [
-                          const SizedBox(height: 20),
-                          // Logo with glow effect
-                          Container(
-                            padding: const EdgeInsets.all(15),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.9),
-                              borderRadius: BorderRadius.circular(20),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.blue.withOpacity(0.2),
-                                  blurRadius: 15,
-                                  offset: const Offset(0, 5),
-                                ),
-                              ],
-                            ),
-                            child: Image.asset(
-                              'assets/images/blue_logo.png',
-                              height: 50,
-                              fit: BoxFit.contain,
-                            ),
-                          ),
-                          const SizedBox(height: 30),
-                          // Enhanced title
-                          Container(
+                          SizedBox(height: 40),
+                                                    Container(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 25,
                               vertical: 12,
@@ -114,15 +93,17 @@ class _tripsScreenState extends State<tripsScreen>
                               ),
                             ),
                           ),
+ 
+                          const SizedBox(height: 40),
+                          // Logo with glow effect
+                        //  const SizedBox(height: 15),
+                          // Enhanced title
+                         SizedBox(height: 20),
                         ],
                       ),
                     ),
-                  ],
-                ),
-              ),
-
-              // Enhanced Trip Cards with PageView
-              Expanded(
+                    SizedBox(height: 40),
+                  Expanded(
                 child: PageView(
                   controller: _pageController,
                   physics: const BouncingScrollPhysics(),
@@ -149,18 +130,23 @@ class _tripsScreenState extends State<tripsScreen>
                     ),
                     _buildEnhancedTripCard(
                       imagePath: 'assets/images/ballon.png',
-                      title: "🌄 Majestic Dawn Adventure",
+                      title: "🌄 Majestic Dawn ",
                       subtitle: "Experience the magic of sunrise",
                       date: "August 12, 2024",
                       time: "6:00 AM",
                       price: "100",
-                      status: "Completed",
+                      status: "Upcoming",
                       color: const Color(0xFFDDA0DD),
                     ),
                   ],
                 ),
               ),
+ ],
+                ),
+              ),
 
+              // Enhanced Trip Cards with PageView
+            
               const SizedBox(height: 20),
             ],
           ),
@@ -252,7 +238,7 @@ class _tripsScreenState extends State<tripsScreen>
     required Color color,
   }) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 25),
+      margin: const EdgeInsets.only(left: 15, right: 15, top: 140, bottom: 25),
       child: Stack(
         clipBehavior: Clip.none,
         children: [
@@ -295,24 +281,14 @@ class _tripsScreenState extends State<tripsScreen>
                   title,
                   textAlign: TextAlign.center,
                   style: const TextStyle(
-                    fontSize: 20,
+                    fontSize: 16,
                     fontWeight: FontWeight.w900,
                     color: Color(0xFF1E3A8A),
                     letterSpacing: 0.5,
                   ),
                 ),
                 const SizedBox(height: 8),
-                Text(
-                  subtitle,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: Colors.grey[600],
-                    fontStyle: FontStyle.italic,
-                  ),
-                ),
-                const SizedBox(height: 20),
-
+              
                 // Enhanced info cards
                 _buildInfoCard(Icons.access_time_rounded, "Time", time, color),
                 const SizedBox(height: 10),
@@ -339,7 +315,7 @@ class _tripsScreenState extends State<tripsScreen>
                   status == "Completed" ? Colors.green : Colors.orange,
                 ),
 
-                const SizedBox(height: 20),
+                const SizedBox(height: 10),
 
                 // Enhanced action button
                 Container(
@@ -376,7 +352,7 @@ class _tripsScreenState extends State<tripsScreen>
                       size: 20,
                     ),
                     label: const Text(
-                      "VIEW TICKET",
+                      "Show details",
                       style: TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,

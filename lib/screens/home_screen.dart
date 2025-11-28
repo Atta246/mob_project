@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mob_project/screens/booking_screen.dart';
 
 class homeScreen extends StatefulWidget {
   const homeScreen({super.key});
@@ -88,12 +89,14 @@ class _homeScreenState extends State<homeScreen> {
                           'assets/images/ballon1.png',
                           "Sunrise Trip",
                           "Our most popular adventure—watch the sunrise paint the sky from a floating balloon.",
+                          tripId: 'sunrise_trip',
                         ),
                         const SizedBox(height: 20),
                         _buildTripCard(
                           'assets/images/ballon2.png',
                           "After Sunrise Trip",
                           "Golden skies, quiet winds, and a perfect sunrise—our most unforgettable trip.",
+                          tripId: 'after_sunrise_trip',
                         ),
                         const SizedBox(height: 30),
                       ],
@@ -160,7 +163,12 @@ class _homeScreenState extends State<homeScreen> {
     );
   }
 
-  Widget _buildTripCard(String imagePath, String title, String description) {
+  Widget _buildTripCard(
+    String imagePath,
+    String title,
+    String description, {
+    required String tripId,
+  }) {
     return Container(
       decoration: BoxDecoration(
         color: _cardBackgroundColor,
@@ -208,21 +216,31 @@ class _homeScreenState extends State<homeScreen> {
                 const SizedBox(height: 15),
                 Align(
                   alignment: Alignment.centerRight,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 8,
-                    ),
-                    decoration: BoxDecoration(
-                      color: _bookBtnColor,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: const Text(
-                      "BOOK NOW",
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black87,
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => BookingPage(tripId: tripId),
+                        ),
+                      );
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 8,
+                      ),
+                      decoration: BoxDecoration(
+                        color: _bookBtnColor,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: const Text(
+                        "BOOK NOW",
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
+                        ),
                       ),
                     ),
                   ),

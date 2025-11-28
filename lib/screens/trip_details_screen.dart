@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mob_project/screens/booking_screen.dart';
 import 'package:mob_project/screens/main_screen.dart';
 import 'package:mob_project/widgets/custom_bottom_nav.dart';
 
@@ -423,7 +424,10 @@ class _TripDetailsPageState extends State<TripDetailsPage>
                   ),
                   const Spacer(),
                   ElevatedButton(
-                    onPressed: () => {//navigate to booking screen
+                    onPressed: () => { Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => BookingPage(tripId: '1',)),
+                        )
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.white,
