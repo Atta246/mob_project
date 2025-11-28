@@ -147,12 +147,12 @@ class _tripsScreenState extends State<tripsScreen>
                     ),
                     _buildEnhancedTripCard(
                       imagePath: 'assets/images/ballon.png',
-                      title: "🌄 Majestic Dawn Adventure",
+                      title: "🌄 Majestic Dawn ",
                       subtitle: "Experience the magic of sunrise",
                       date: "August 12, 2024",
                       time: "6:00 AM",
                       price: "100",
-                      status: "Completed",
+                      status: "Upcoming",
                       color: const Color(0xFFDDA0DD),
                     ),
                   ],
@@ -337,7 +337,7 @@ class _tripsScreenState extends State<tripsScreen>
                   status == "Completed" ? Colors.green : Colors.orange,
                 ),
 
-                const SizedBox(height: 20),
+                const SizedBox(height: 10),
 
                 // Enhanced action button
                 Container(
@@ -371,7 +371,7 @@ class _tripsScreenState extends State<tripsScreen>
                       size: 20,
                     ),
                     label: const Text(
-                      "VIEW TICKET",
+                      "Show details",
                       style: TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
