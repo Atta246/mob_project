@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mob_project/screens/main_screen.dart';
+import 'package:mob_project/screens/ticket_screen.dart';
 import '../widgets/custom_bottom_nav.dart';
 
 class PaymentScreen extends StatefulWidget {
@@ -103,26 +104,37 @@ class _PaymentScreenState extends State<PaymentScreen> {
               width: double.infinity,
               height: 60,
               child: ElevatedButton(
-                
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.lightBlue,
                   shape: RoundedRectangleBorder(
-                    
                     borderRadius: BorderRadius.circular(12),
                   ),
                   elevation: 0,
                 ),
-                onPressed: () {},
+                onPressed: () {
+                  final bookingId =
+                      'BK-${DateTime.now().millisecondsSinceEpoch}';
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => TicketPage(bookingId: bookingId),
+                    ),
+                  );
+                },
                 child: const Text(
                   'Confirm Booking',
-                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
                 ),
               ),
             ),
           ],
         ),
       ),
-       bottomNavigationBar: CustomBottomNav(
+      bottomNavigationBar: CustomBottomNav(
         currentIndex: 2,
         onTap: (index) {
           if (index == 2) {
@@ -138,7 +150,6 @@ class _PaymentScreenState extends State<PaymentScreen> {
           }
         },
       ),
-    
     );
   }
 
@@ -162,7 +173,10 @@ class _PaymentScreenState extends State<PaymentScreen> {
             Expanded(
               child: Text(
                 label,
-                style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+                style: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
             ),
             Radio<int>(

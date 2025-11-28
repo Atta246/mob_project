@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
- 
+
 class TicketPage extends StatelessWidget {
   final String bookingId;
 
@@ -23,13 +23,13 @@ class TicketPage extends StatelessWidget {
     };
 
     return Scaffold(
-      backgroundColor: Theme.of(context).primaryColor,
+      backgroundColor: const Color.fromARGB(255, 66, 163, 237),
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => context.go('/home'),
+          onPressed: () => Navigator.of(context).pop(),
         ),
         title: const Text('Your Ticket', style: TextStyle(color: Colors.white)),
         actions: [
@@ -459,7 +459,7 @@ class TicketPage extends StatelessWidget {
                   SizedBox(
                     width: double.infinity,
                     child: OutlinedButton.icon(
-                      onPressed: () => context.go('/chat'),
+                      onPressed: () => Navigator.of(context).pop(),
                       style: OutlinedButton.styleFrom(
                         side: const BorderSide(color: Colors.white),
                         foregroundColor: Colors.white,
