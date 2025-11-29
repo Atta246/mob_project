@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:mob_project/screens/login_screen.dart';
+import 'package:mob_project/screens/signup_screen.dart';
 import '../../widgets/custom_bottom_nav.dart';
 import 'edit_profile_screen.dart';
 import 'change_password_screen.dart';
@@ -51,7 +53,10 @@ class SettingsDetailScreen extends StatelessWidget {
               'Delete Account',
               Colors.red,
               () {
-                print('Delete Account tapped');
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => signupScreen()),
+                );
               },
             ),
             SizedBox(height: 24),
@@ -60,7 +65,11 @@ class SettingsDetailScreen extends StatelessWidget {
               height: 60,
               child: ElevatedButton(
                 onPressed: () {
-                  print('Logout tapped');
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => loginScreen()),
+                    
+                  );
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.blue,
