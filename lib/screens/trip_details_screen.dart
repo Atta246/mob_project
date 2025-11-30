@@ -466,7 +466,7 @@ class _TripDetailsPageState extends State<TripDetailsPage>
         ],
       ),
         bottomNavigationBar: CustomBottomNav(
-        currentIndex: 2,
+        currentIndex: 1,
         onTap: (index) {
           if (index == 2) {
             Navigator.popUntil(context, (route) => route.isFirst);

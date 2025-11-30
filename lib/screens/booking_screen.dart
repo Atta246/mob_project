@@ -372,7 +372,7 @@ class _BookingPageState extends State<BookingPage> {
                     width: 20,
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
-                : Text('Book Now - \$${_finalTotal.toStringAsFixed(2)}'),
+                : Text('Book Now   \$${_finalTotal.toStringAsFixed(2)}'),
           ),
         ),
       ),
