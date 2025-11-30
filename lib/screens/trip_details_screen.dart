@@ -92,7 +92,7 @@ class _TripDetailsPageState extends State<TripDetailsPage>
       child: PageView.builder(
         itemCount: _tripData['images'].length,
         itemBuilder: (context, index) {
-          return Image.network(_tripData['images'][index], fit: BoxFit.cover);
+          return Image.asset(_tripData['images'][index], fit: BoxFit.cover);
         },
       ),
     );
