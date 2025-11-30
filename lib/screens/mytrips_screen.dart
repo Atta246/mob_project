@@ -7,41 +7,41 @@ class MyTripsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-       appBar: AppBar(
+      appBar: AppBar(
         title: Text('My Trips'),
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
         elevation: 0,
         centerTitle: true,
       ),
-      
-    
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
-        child: Column(
-          children: [
-            SizedBox(height: 16),
-            TripCard(
-              image: 'assets/images/ballon.png',
-              status: 'UPCOMING',
-              location: 'Egypt, Luxor',
-              dateRange: 'Sep 15 - Sep 22, 2026',
-              people: '2 people',
-              buttonText: 'View Details',
-              buttonColor: Colors.blue,
-            ),
-            SizedBox(height: 16),
-            TripCard(
-              image: 'assets/images/ballon.png',
-              status: 'UPCOMING',
-              location: 'Egypt, Luxor',
-              dateRange: 'Jul 10 - Jul 18, 2026',
-              people: '4 people',
-              buttonText: 'View Details',
-              buttonColor: Colors.blue,
-             
-            ),
-          ],
+
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+          child: Column(
+            children: [
+              SizedBox(height: 16),
+              TripCard(
+                image: 'assets/images/ballon.png',
+                status: 'UPCOMING',
+                location: 'Egypt, Luxor',
+                dateRange: 'Sep 15 - Sep 22, 2026',
+                people: '2 people',
+                buttonText: 'View Details',
+                buttonColor: Colors.blue,
+              ),
+              SizedBox(height: 16),
+              TripCard(
+                image: 'assets/images/ballon.png',
+                status: 'UPCOMING',
+                location: 'Egypt, Luxor',
+                dateRange: 'Jul 10 - Jul 18, 2026',
+                people: '4 people',
+                buttonText: 'View Details',
+                buttonColor: Colors.blue,
+              ),
+            ],
+          ),
         ),
       ),
       bottomNavigationBar: CustomBottomNav(
@@ -147,10 +147,14 @@ class TripCard extends StatelessWidget {
                         borderRadius: BorderRadius.circular(8),
                       ),
                     ),
-                    onPressed: () {Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => TicketPage(bookingId: '1',)),
-                    );},
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => TicketPage(bookingId: '1'),
+                        ),
+                      );
+                    },
                     child: Text(buttonText),
                   ),
                 ),
@@ -162,4 +166,3 @@ class TripCard extends StatelessWidget {
     );
   }
 }
-
