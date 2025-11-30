@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mob_project/screens/Settings%20screens/support_screen.dart';
+import 'package:mob_project/screens/mytrips_screen.dart';
 import 'package:mob_project/screens/payment_screen.dart';
 import '../../widgets/custom_bottom_nav.dart';
 import 'settings_screen.dart';
@@ -152,7 +153,7 @@ class Setting_page extends StatelessWidget {
                       _buildMenuItem(Icons.card_travel, 'My Trips', () {
                           Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => PaymentScreen()),
+                          MaterialPageRoute(builder: (context) => MyTripsScreen()),
                         );
                       }),
                       SizedBox(height: 12),

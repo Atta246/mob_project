@@ -57,10 +57,7 @@ class _tripsScreenState extends State<tripsScreen>
                 child: Stack(
                   children: [
                     // Animated floating balloons
-                    ...List.generate(
-                      8,
-                      (index) => _buildAnimatedBalloon(index),
-                    ),
+                  
 
                     // Header content
                     Positioned.fill(
