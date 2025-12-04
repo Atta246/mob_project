@@ -95,8 +95,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
             _buildPaymentOption(1, Icons.account_balance_wallet, 'PayPal'),
             const SizedBox(height: 15),
             _buildPaymentOption(2, Icons.phone_iphone, 'Apple Pay'),
-            const SizedBox(height: 15),
-            _buildPaymentOption(3, Icons.phone_iphone, 'Vodafone Cash'),
+
             const Spacer(),
             SizedBox(
               width: double.infinity,
@@ -132,7 +131,6 @@ class _PaymentScreenState extends State<PaymentScreen> {
           ],
         ),
       ),
-
     );
   }
 

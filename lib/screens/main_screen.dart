@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mob_project/screens/home.dart';
 import 'package:mob_project/screens/home_screen.dart';
 import 'package:mob_project/screens/trips_screen.dart';
 import 'package:mob_project/screens/Settings%20screens/Profile_screen.dart';
@@ -27,7 +28,7 @@ class _mainScreenState extends State<mainScreen> {
     Widget currentBody;
     switch (_selectedIndex) {
       case 0:
-        currentBody = const homeScreen();
+        currentBody = const HomePage();
         break;
       case 1:
         currentBody = const tripsScreen();
