@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:mob_project/screens/ticket_screen.dart';
+import 'package:mob_project/widgets/widgets.dart';
+import 'package:mob_project/screens/trips/ticket_screen.dart';
 
 class PaymentScreen extends StatefulWidget {
   const PaymentScreen({super.key});
@@ -22,7 +23,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
         elevation: 0,
         centerTitle: true,
       ),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(20.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -90,17 +91,57 @@ class _PaymentScreenState extends State<PaymentScreen> {
               ),
             ),
             const SizedBox(height: 40),
-            _buildPaymentOption(0, Icons.credit_card, 'Credit Card'),
-            const SizedBox(height: 15),
-            _buildPaymentOption(1, Icons.account_balance_wallet, 'PayPal'),
-            const SizedBox(height: 15),
-            _buildPaymentOption(2, Icons.phone_iphone, 'Apple Pay'),
-            const SizedBox(height: 15),
-            _buildPaymentOption(3, Icons.phone_iphone, 'Vodafone Cash'),
-            const Spacer(),
+            PaymentOption(
+              index: 0,
+              selectedIndex: _selectedPayment,
+              icon: Icons.credit_card,
+              label: 'Credit Card',
+              onTap: () {
+                setState(() {
+                  _selectedPayment = 0;
+                });
+              },
+            ),
+            const SizedBox(height: 12),
+            PaymentOption(
+              index: 1,
+              selectedIndex: _selectedPayment,
+              icon: Icons.account_balance_wallet,
+              label: 'PayPal',
+              onTap: () {
+                setState(() {
+                  _selectedPayment = 1;
+                });
+              },
+            ),
+            const SizedBox(height: 12),
+            PaymentOption(
+              index: 2,
+              selectedIndex: _selectedPayment,
+              icon: Icons.phone_iphone,
+              label: 'Apple Pay',
+              onTap: () {
+                setState(() {
+                  _selectedPayment = 2;
+                });
+              },
+            ),
+            const SizedBox(height: 12),
+            PaymentOption(
+              index: 3,
+              selectedIndex: _selectedPayment,
+              icon: Icons.phone_iphone,
+              label: 'Vodafone Cash',
+              onTap: () {
+                setState(() {
+                  _selectedPayment = 3;
+                });
+              },
+            ),
+            const SizedBox(height: 40),
             SizedBox(
               width: double.infinity,
-              height: 60,
+              height: MediaQuery.of(context).size.height * 0.07,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.lightBlue,
@@ -128,49 +169,6 @@ class _PaymentScreenState extends State<PaymentScreen> {
                   ),
                 ),
               ),
-            ),
-          ],
-        ),
-      ),
-
-    );
-  }
-
-  Widget _buildPaymentOption(int index, IconData icon, String label) {
-    return InkWell(
-      onTap: () {
-        setState(() {
-          _selectedPayment = index;
-        });
-      },
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Row(
-          children: [
-            Icon(icon, color: Colors.black54),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Text(
-                label,
-                style: const TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-            Radio<int>(
-              value: index,
-              groupValue: _selectedPayment,
-              onChanged: (val) {
-                setState(() {
-                  _selectedPayment = val!;
-                });
-              },
-              activeColor: Colors.lightBlue,
             ),
           ],
         ),

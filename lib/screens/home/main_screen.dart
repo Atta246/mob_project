@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:mob_project/screens/home_screen.dart';
-import 'package:mob_project/screens/trips_screen.dart';
-import 'package:mob_project/screens/Settings%20screens/Profile_screen.dart';
-import '../widgets/custom_bottom_nav.dart';
+import 'package:mob_project/screens/home/home_screen.dart';
+import 'package:mob_project/screens/trips/trips_screen.dart';
+import 'package:mob_project/screens/settings/Profile_screen.dart';
+import '../../widgets/custom_bottom_nav.dart';
 
 class mainScreen extends StatefulWidget {
   final int initialIndex;

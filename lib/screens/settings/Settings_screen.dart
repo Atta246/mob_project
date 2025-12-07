@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:mob_project/screens/login_screen.dart';
-import 'package:mob_project/screens/signup_screen.dart';
-import '../../widgets/custom_bottom_nav.dart';
+import 'package:mob_project/screens/auth/login_screen.dart';
+import 'package:mob_project/screens/auth/signup_screen.dart';
+import '../../widgets/widgets.dart';
 import 'edit_profile_screen.dart';
 import 'change_password_screen.dart';
-import '../main_screen.dart';
+import '../home/main_screen.dart';
 
 class SettingsDetailScreen extends StatelessWidget {
   const SettingsDetailScreen({super.key});
@@ -43,7 +43,9 @@ class SettingsDetailScreen extends StatelessWidget {
               () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => ChangePasswordScreen()),
+                  MaterialPageRoute(
+                    builder: (context) => ChangePasswordScreen(),
+                  ),
                 );
               },
             ),
@@ -62,13 +64,12 @@ class SettingsDetailScreen extends StatelessWidget {
             SizedBox(height: 24),
             SizedBox(
               width: double.infinity,
-              height: 60,
+              height: MediaQuery.of(context).size.height * 0.07,
               child: ElevatedButton(
                 onPressed: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(builder: (context) => loginScreen()),
-                    
                   );
                 },
                 style: ElevatedButton.styleFrom(
@@ -109,7 +110,12 @@ class SettingsDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildMenuItem(IconData icon, String label, Color iconColor, VoidCallback onTap) {
+  Widget _buildMenuItem(
+    IconData icon,
+    String label,
+    Color iconColor,
+    VoidCallback onTap,
+  ) {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -131,7 +137,9 @@ class SettingsDetailScreen extends StatelessWidget {
                     label,
                     style: TextStyle(
                       fontSize: 16,
-                      color: label == 'Delete Account' ? Colors.red : Colors.black87,
+                      color: label == 'Delete Account'
+                          ? Colors.red
+                          : Colors.black87,
                     ),
                   ),
                 ),

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mob_project/screens/home/main_screen.dart';
-import 'package:mob_project/widgets/custom_bottom_nav.dart';
-import 'package:mob_project/widgets/cards/trip_card.dart';
+import 'package:mob_project/widgets/widgets.dart';
 
 class MyTripsScreen extends StatelessWidget {
   @override

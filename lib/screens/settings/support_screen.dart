@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import '../../widgets/custom_bottom_nav.dart';
+import '../../widgets/widgets.dart';
 import 'Profile_screen.dart';
 import 'contact_us_screen.dart';
-import '../main_screen.dart';
+import '../home/main_screen.dart';
 
 class SupportScreen extends StatelessWidget {
   const SupportScreen({super.key});
@@ -21,7 +21,6 @@ class SupportScreen extends StatelessWidget {
       body: Padding(
         padding: EdgeInsets.all(18),
         child: Column(
-          
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
@@ -72,13 +71,9 @@ class SupportScreen extends StatelessWidget {
               ),
             ),
             SizedBox(height: 12),
-            _buildFeedbackItem(
-              'Give Feedback',
-              Icons.edit_outlined,
-              () {
-                print('Give Feedback tapped');
-              },
-            ),
+            _buildFeedbackItem('Give Feedback', Icons.edit_outlined, () {
+              print('Give Feedback tapped');
+            }),
           ],
         ),
       ),
@@ -101,9 +96,14 @@ class SupportScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildContactItem(IconData icon, String label, Color iconColor, VoidCallback onTap) {
+  Widget _buildContactItem(
+    IconData icon,
+    String label,
+    Color iconColor,
+    VoidCallback onTap,
+  ) {
     return Container(
-      height: 70,
+      constraints: BoxConstraints(minHeight: 60),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
@@ -122,10 +122,7 @@ class SupportScreen extends StatelessWidget {
                 Expanded(
                   child: Text(
                     label,
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.black87,
-                    ),
+                    style: TextStyle(fontSize: 16, color: Colors.black87),
                   ),
                 ),
                 Icon(Icons.chevron_right, color: Colors.grey[400]),
@@ -137,7 +134,11 @@ class SupportScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildFeedbackItem(String label, IconData trailingIcon, VoidCallback onTap) {
+  Widget _buildFeedbackItem(
+    String label,
+    IconData trailingIcon,
+    VoidCallback onTap,
+  ) {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -155,10 +156,7 @@ class SupportScreen extends StatelessWidget {
                 Expanded(
                   child: Text(
                     label,
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.black87,
-                    ),
+                    style: TextStyle(fontSize: 16, color: Colors.black87),
                   ),
                 ),
                 Icon(trailingIcon, color: Colors.grey[400], size: 20),

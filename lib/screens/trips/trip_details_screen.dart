@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:mob_project/screens/booking_screen.dart';
-import 'package:mob_project/screens/main_screen.dart';
+import 'package:mob_project/screens/trips/booking_screen.dart';
+import 'package:mob_project/screens/home/main_screen.dart';
 import 'package:mob_project/widgets/custom_bottom_nav.dart';
 
 class TripDetailsPage extends StatefulWidget {
@@ -28,9 +28,7 @@ class _TripDetailsPageState extends State<TripDetailsPage>
     'duration': '1 hour',
     'maxAltitude': '3000 feet',
     'groupSize': '8-12 people',
-    'images': [
-      'assets/images/ballon.png',
-   ],
+    'images': ['assets/images/ballon.png'],
     'description':
         'Experience the magical sunrise over Cappadocia\'s fairy chimneys in this unforgettable hot air balloon adventure. Float gently above the otherworldly landscape as the first light of day illuminates the ancient volcanic formations.',
     'highlights': [
@@ -129,11 +127,7 @@ class _TripDetailsPageState extends State<TripDetailsPage>
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(
-                    Icons.check_circle,
-                    color: Colors.green,
-                    size: 20,
-                  ),
+                  Icon(Icons.check_circle, color: Colors.green, size: 20),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
@@ -186,7 +180,6 @@ class _TripDetailsPageState extends State<TripDetailsPage>
       ),
     );
   }
-
 
   Widget _buildReviewsTab() {
     return SingleChildScrollView(
@@ -424,10 +417,13 @@ class _TripDetailsPageState extends State<TripDetailsPage>
                   ),
                   const Spacer(),
                   ElevatedButton(
-                    onPressed: () => { Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => BookingPage(tripId: '1',)),
-                        )
+                    onPressed: () => {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => BookingPage(tripId: '1'),
+                        ),
+                      ),
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.white,
@@ -457,15 +453,12 @@ class _TripDetailsPageState extends State<TripDetailsPage>
           SliverFillRemaining(
             child: TabBarView(
               controller: _tabController,
-              children: [
-                _buildOverviewTab(),
-                _buildReviewsTab(),
-              ],
+              children: [_buildOverviewTab(), _buildReviewsTab()],
             ),
           ),
         ],
       ),
-        bottomNavigationBar: CustomBottomNav(
+      bottomNavigationBar: CustomBottomNav(
         currentIndex: 1,
         onTap: (index) {
           if (index == 2) {
@@ -481,7 +474,6 @@ class _TripDetailsPageState extends State<TripDetailsPage>
           }
         },
       ),
-    
     );
   }
 }

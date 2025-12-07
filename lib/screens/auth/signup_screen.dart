@@ -1,32 +1,30 @@
 import 'package:flutter/material.dart';
-import 'package:mob_project/screens/main_screen.dart';
-import 'package:mob_project/screens/signup_screen.dart';
-import 'package:mob_project/screens/home_screen.dart';
+import 'package:mob_project/screens/home/main_screen.dart';
+import 'package:mob_project/widgets/widgets.dart';
+import 'package:mob_project/constants/constants.dart';
 
-class loginScreen extends StatefulWidget {
-  const loginScreen({super.key});
+// ignore: camel_case_types
+class signupScreen extends StatefulWidget {
+  const signupScreen({super.key});
 
   @override
-  State<loginScreen> createState() => _loginScreenState();
+  State<signupScreen> createState() => _signupScreenState();
 }
 
-class _loginScreenState extends State<loginScreen> {
+class _signupScreenState extends State<signupScreen> {
   bool _isPasswordVisible = false;
+  final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
-  // Define colors from the design
-  final Color _bgTopColor = const Color(0xFF8AE4FF); // Light blue top
-  final Color _bgBottomColor = const Color(0xFFEBEBEB); // Greyish bottom
-  final Color _inputFillColor = const Color(0xFFCFEFF8); // Pale blue input bg
-  final Color _buttonColor = const Color(0xFF81D4FA); // Login button color
-  final Color _textColor = const Color(0xFF37474F); // Dark grey text
+  // Define colors from the design (reused)
+  final Color _bgTopColor = const Color(0xFF8AE4FF);
+  final Color _bgBottomColor = const Color(0xFFEBEBEB);
+  final Color _inputFillColor = const Color(0xFFCFEFF8);
+  final Color _buttonColor = const Color(0xFF81D4FA);
 
   @override
   Widget build(BuildContext context) {
-    // Screen size for responsive layout
-    final Size size = MediaQuery.of(context).size;
-
     return Scaffold(
       body: Container(
         width: double.infinity,
@@ -48,42 +46,56 @@ class _loginScreenState extends State<loginScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // ...existing code...
-                // Option A — use screen width fraction
+                // Back button to go back to Login (Optional, but good UX)
+                Align(
+                  alignment: Alignment.topLeft,
+                  child: IconButton(
+                    icon: const Icon(Icons.arrow_back, color: Colors.black54),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                ),
+
+                // --- Logo Section ---
                 Image.asset(
                   'assets/images/logo.png',
-                  width: size.width * 0.6, // 60% of screen width
-
-                  fit: BoxFit.contain,
+                  height: MediaQuery.of(context).size.height * 0.12,
                 ),
-                // ...existing code...
-                const SizedBox(),
+                const SizedBox(height: 20),
                 Text(
-                  "Login to your account to continue.",
+                  "Create New Account",
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.blueGrey[800],
+                    fontSize: 22,
+                    fontWeight: FontWeight.w800,
+                    color: Colors.blueGrey[900],
                   ),
                 ),
                 const SizedBox(height: 40),
 
                 // --- Input Fields ---
-                _buildLabel("USERNAME OR EMAIL"),
+
+                // 1. Username
+                _buildLabel("USERNAME"),
                 const SizedBox(height: 8),
                 _buildTextField(
-                  controller: _emailController,
-                  hintText: "Enter your Username or Email address",
-                  icon: null,
+                  controller: _usernameController,
+                  hintText:
+                      "", // Image shows empty hint, but you can add "Enter Username"
                 ),
                 const SizedBox(height: 20),
 
+                // 2. Email
+                _buildLabel("EMAIL"),
+                const SizedBox(height: 8),
+                _buildTextField(controller: _emailController, hintText: ""),
+                const SizedBox(height: 20),
+
+                // 3. Password
                 _buildLabel("PASSWORD"),
                 const SizedBox(height: 8),
                 _buildTextField(
                   controller: _passwordController,
-                  hintText: "Enter your Password",
+                  hintText: "",
                   obscureText: !_isPasswordVisible,
                   icon: IconButton(
                     icon: Icon(
@@ -116,92 +128,41 @@ class _loginScreenState extends State<loginScreen> {
                 ),
                 const SizedBox(height: 10),
 
-                // --- Login Button ---
-                SizedBox(
-                  width: 160, // Fixed width pill shape
+                // --- Sign Up Button ---
+                CustomButton(
+                  text: "SIGN UP",
+                  onPressed: () {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const mainScreen(),
+                      ),
+                    );
+                  },
+                  backgroundColor: _buttonColor,
                   height: 50,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      // Navigate to home and remove login from back stack
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const mainScreen(),
-                        ),
-                      );
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: _buttonColor,
-                      foregroundColor: Colors.black,
-                      elevation: 2,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                    ),
-                    child: const Text(
-                      "LOGIN",
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 0.5,
-                      ),
-                    ),
-                  ),
                 ),
-                const SizedBox(height: 20),
 
-                // --- Sign Up Link ---
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      "Don't have an account ? ",
-                      style: TextStyle(
-                        color: Colors.grey[700],
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const signupScreen(),
-                          ),
-                        );
-                      },
-                      child: Text(
-                        "SIGN UP",
-                        style: TextStyle(
-                          color: Colors.grey[900],
-                          fontSize: 14,
-                          fontWeight: FontWeight.w900,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
                 const SizedBox(height: 30),
 
                 // --- OR Divider ---
-                Row(
+                const Row(
                   children: [
-                    const Expanded(
+                    Expanded(
                       child: Divider(color: Colors.black54, thickness: 1.2),
                     ),
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                      padding: EdgeInsets.symmetric(horizontal: 10),
                       child: Text(
                         "or",
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
                           color: Colors.black,
                         ),
                       ),
                     ),
-                    const Expanded(
+                    Expanded(
                       child: Divider(color: Colors.black54, thickness: 1.2),
                     ),
                   ],
@@ -210,8 +171,7 @@ class _loginScreenState extends State<loginScreen> {
 
                 // --- Social Buttons ---
                 _buildSocialButton(
-                  text: "Continue with Google",
-                  // Using a network image for Google Icon
+                  text: "Sign in with Google",
                   icon: Image.network(
                     'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/120px-Google_%22G%22_logo.svg.png',
                     height: 24,
@@ -219,8 +179,7 @@ class _loginScreenState extends State<loginScreen> {
                 ),
                 const SizedBox(height: 15),
                 _buildSocialButton(
-                  text: "Continue with Facebook",
-                  // Using a network image for Facebook Icon
+                  text: "Sign in with Facebook",
                   icon: Image.network(
                     'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b8/2021_Facebook_icon.svg/150px-2021_Facebook_icon.svg.png',
                     height: 24,
@@ -235,7 +194,9 @@ class _loginScreenState extends State<loginScreen> {
     );
   }
 
-  // Helper widget for Labels
+  // --- Helpers for Sign Up Screen ---
+  // (Duplicated for simplicity in this single-file example)
+
   Widget _buildLabel(String text) {
     return Align(
       alignment: Alignment.centerLeft,
@@ -250,7 +211,6 @@ class _loginScreenState extends State<loginScreen> {
     );
   }
 
-  // Helper widget for TextFields
   Widget _buildTextField({
     required TextEditingController controller,
     required String hintText,
@@ -293,7 +253,6 @@ class _loginScreenState extends State<loginScreen> {
     );
   }
 
-  // Helper widget for Social Buttons
   Widget _buildSocialButton({required String text, required Widget icon}) {
     return Container(
       width: double.infinity,
@@ -311,7 +270,7 @@ class _loginScreenState extends State<loginScreen> {
       child: ElevatedButton(
         onPressed: () {},
         style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFF90E0FF), // Light blue social btn
+          backgroundColor: const Color(0xFF90E0FF),
           foregroundColor: Colors.black,
           shadowColor: Colors.transparent,
           shape: RoundedRectangleBorder(
@@ -334,7 +293,6 @@ class _loginScreenState extends State<loginScreen> {
                 ),
               ),
             ),
-            // Invisible spacer to balance the icon on the left
             const SizedBox(width: 34),
           ],
         ),

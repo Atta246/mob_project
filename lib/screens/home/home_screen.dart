@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:mob_project/screens/booking_screen.dart';
+import 'package:mob_project/screens/trips/booking_screen.dart';
+import 'package:mob_project/widgets/widgets.dart';
 
 class homeScreen extends StatefulWidget {
   const homeScreen({super.key});
@@ -25,7 +26,7 @@ class _homeScreenState extends State<homeScreen> {
             child: Center(
               child: Image.asset(
                 'assets/images/blue_logo.png',
-                height: 60,
+                height: MediaQuery.of(context).size.height * 0.08,
                 fit: BoxFit.contain,
               ),
             ),
@@ -39,7 +40,7 @@ class _homeScreenState extends State<homeScreen> {
                   const SizedBox(height: 10),
                   // Carousel
                   SizedBox(
-                    height: 220,
+                    height: MediaQuery.of(context).size.height * 0.27,
                     child: PageView(
                       controller: _pageController,
                       onPageChanged: (index) =>
@@ -85,18 +86,38 @@ class _homeScreenState extends State<homeScreen> {
                     padding: const EdgeInsets.symmetric(horizontal: 20.0),
                     child: Column(
                       children: [
-                        _buildTripCard(
-                          'assets/images/ballon1.png',
-                          "Sunrise Trip",
-                          "Our most popular adventure—watch the sunrise paint the sky from a floating balloon.",
+                        HomeTripCard(
+                          imagePath: 'assets/images/ballon1.png',
+                          title: "Sunrise Trip",
+                          description:
+                              "Our most popular adventure—watch the sunrise paint the sky from a floating balloon.",
                           tripId: 'sunrise_trip',
+                          onBookNow: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    BookingPage(tripId: 'sunrise_trip'),
+                              ),
+                            );
+                          },
                         ),
                         const SizedBox(height: 20),
-                        _buildTripCard(
-                          'assets/images/ballon2.png',
-                          "After Sunrise Trip",
-                          "Golden skies, quiet winds, and a perfect sunrise—our most unforgettable trip.",
+                        HomeTripCard(
+                          imagePath: 'assets/images/ballon2.png',
+                          title: "After Sunrise Trip",
+                          description:
+                              "Golden skies, quiet winds, and a perfect sunrise—our most unforgettable trip.",
                           tripId: 'after_sunrise_trip',
+                          onBookNow: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    BookingPage(tripId: 'after_sunrise_trip'),
+                              ),
+                            );
+                          },
                         ),
                         const SizedBox(height: 30),
                       ],
@@ -159,96 +180,6 @@ class _homeScreenState extends State<homeScreen> {
             ? const Color(0xFF64B5F6)
             : Colors.grey[300],
         shape: BoxShape.circle,
-      ),
-    );
-  }
-
-  Widget _buildTripCard(
-    String imagePath,
-    String title,
-    String description, {
-    required String tripId,
-  }) {
-    return Container(
-      decoration: BoxDecoration(
-        color: _cardBackgroundColor,
-        borderRadius: BorderRadius.circular(35),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          ClipRRect(
-            borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(35),
-              topRight: Radius.circular(35),
-              bottomLeft: Radius.circular(20),
-              bottomRight: Radius.circular(20),
-            ),
-            child: Image.asset(
-              imagePath,
-              height: 160,
-              width: double.infinity,
-              fit: BoxFit.cover,
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF424242),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  description,
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: Colors.grey[800],
-                    height: 1.4,
-                  ),
-                ),
-                const SizedBox(height: 15),
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => BookingPage(tripId: tripId),
-                        ),
-                      );
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 20,
-                        vertical: 8,
-                      ),
-                      decoration: BoxDecoration(
-                        color: _bookBtnColor,
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: const Text(
-                        "BOOK NOW",
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black87,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
       ),
     );
   }

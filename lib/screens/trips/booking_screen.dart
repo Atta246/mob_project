@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
-import 'package:mob_project/screens/payment_screen.dart';
+import 'package:mob_project/widgets/widgets.dart';
+import 'package:mob_project/screens/trips/payment_screen.dart';
 
 class BookingPage extends StatefulWidget {
   final String tripId;
@@ -327,19 +328,22 @@ class _BookingPageState extends State<BookingPage> {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  _buildPriceRow(
-                    '\$${_tripData['price']} x $_numberOfGuests guests',
-                    '\$${_totalPrice.toStringAsFixed(2)}',
+                  PriceRow(
+                    label: '\$${_tripData['price']} x $_numberOfGuests guests',
+                    amount: '\$${_totalPrice.toStringAsFixed(2)}',
                   ),
-                  _buildPriceRow(
-                    'Service fee',
-                    '\$${_serviceFee.toStringAsFixed(2)}',
+                  PriceRow(
+                    label: 'Service fee',
+                    amount: '\$${_serviceFee.toStringAsFixed(2)}',
                   ),
-                  _buildPriceRow('Taxes', '\$${_taxes.toStringAsFixed(2)}'),
+                  PriceRow(
+                    label: 'Taxes',
+                    amount: '\$${_taxes.toStringAsFixed(2)}',
+                  ),
                   const Divider(),
-                  _buildPriceRow(
-                    'Total',
-                    '\$${_finalTotal.toStringAsFixed(2)}',
+                  PriceRow(
+                    label: 'Total',
+                    amount: '\$${_finalTotal.toStringAsFixed(2)}',
                     isTotal: true,
                   ),
                 ],
@@ -367,38 +371,14 @@ class _BookingPageState extends State<BookingPage> {
               padding: const EdgeInsets.symmetric(vertical: 16),
             ),
             child: _isLoading
-                ? const SizedBox(
-                    height: 20,
-                    width: 20,
+                ? SizedBox(
+                    height: MediaQuery.of(context).size.height * 0.025,
+                    width: MediaQuery.of(context).size.height * 0.025,
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
                 : Text('Book Now   \$${_finalTotal.toStringAsFixed(2)}'),
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildPriceRow(String label, String amount, {bool isTotal = false}) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            label,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              fontWeight: isTotal ? FontWeight.bold : FontWeight.normal,
-            ),
-          ),
-          Text(
-            amount,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: isTotal ? Theme.of(context).primaryColor : null,
-            ),
-          ),
-        ],
       ),
     );
   }

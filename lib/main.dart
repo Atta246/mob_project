@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:mob_project/screens/login_screen.dart';
-import 'package:mob_project/screens/payment_screen.dart';
-import 'package:mob_project/screens/signup_screen.dart';
-import 'package:mob_project/screens/main_screen.dart';
+import 'package:mob_project/screens/auth/login_screen.dart';
+import 'package:mob_project/screens/trips/payment_screen.dart';
+import 'package:mob_project/screens/auth/signup_screen.dart';
+import 'package:mob_project/screens/home/main_screen.dart';
 
 void main() {
   runApp(const MyApp());

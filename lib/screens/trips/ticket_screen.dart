@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:mob_project/screens/main_screen.dart';
+import 'package:mob_project/screens/home/main_screen.dart';
+import 'package:mob_project/screens/settings/support_screen.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
 class TicketPage extends StatelessWidget {
@@ -445,7 +446,7 @@ class TicketPage extends StatelessWidget {
                     width: double.infinity,
                     child: ElevatedButton.icon(
                       onPressed: () {
-                         Navigator.push(
+                        Navigator.push(
                           context,
                           MaterialPageRoute(builder: (context) => mainScreen()),
                         );
@@ -463,7 +464,13 @@ class TicketPage extends StatelessWidget {
                   SizedBox(
                     width: double.infinity,
                     child: OutlinedButton.icon(
-                      onPressed: () => Navigator.of(context).pop(),
+                      onPressed: () {
+                        // Navigate to support screen
+                        // Replace 'SupportScreen()' with your actual support screen widget
+                        Navigator.of(context).push(
+                          MaterialPageRoute(builder: (context) => const SupportScreen()),
+                        );
+                      },
                       style: OutlinedButton.styleFrom(
                         side: const BorderSide(color: Colors.white),
                         foregroundColor: Colors.white,
