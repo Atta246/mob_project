@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:mob_project/screens/auth/login_screen.dart';
-import 'package:mob_project/screens/trips/payment_screen.dart';
-import 'package:mob_project/screens/auth/signup_screen.dart';
-import 'package:mob_project/screens/home/main_screen.dart';
+
+import 'package:mob_project/screens/start.dart';
+
 
 void main() {
   runApp(const MyApp());
@@ -21,7 +20,7 @@ class MyApp extends StatelessWidget {
           seedColor: const Color.fromARGB(255, 124, 193, 246),
         ),
       ),
-      home: const loginScreen(),
+      home: const StartApp(),
     );
   }
 }

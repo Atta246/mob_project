@@ -47,7 +47,7 @@ class MyTripsScreen extends StatelessWidget {
         currentIndex: 2,
         onTap: (index) {
           if (index == 2) {
-            Navigator.popUntil(context, (route) => route.isFirst);
+            Navigator.pop(context, (route) => route.isFirst);
           } else {
             Navigator.pushAndRemoveUntil(
               context,

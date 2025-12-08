@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+// import 'package:mob_project/screens/home.dart';
 import 'package:mob_project/screens/home/home_screen.dart';
 import 'package:mob_project/screens/trips/trips_screen.dart';
 import 'package:mob_project/screens/settings/Profile_screen.dart';
 import '../../widgets/custom_bottom_nav.dart';
 
+// ignore: camel_case_types
 class mainScreen extends StatefulWidget {
   final int initialIndex;
   const mainScreen({super.key, this.initialIndex = 0});
@@ -12,6 +14,7 @@ class mainScreen extends StatefulWidget {
   State<mainScreen> createState() => _mainScreenState();
 }
 
+// ignore: camel_case_types
 class _mainScreenState extends State<mainScreen> {
   late int _selectedIndex;
 
