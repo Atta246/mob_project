@@ -1,7 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:mob_project/utils/validators.dart';
 
-class ContactUsScreen extends StatelessWidget {
+class ContactUsScreen extends StatefulWidget {
   const ContactUsScreen({super.key});
+
+  @override
+  State<ContactUsScreen> createState() => _ContactUsScreenState();
+}
+
+class _ContactUsScreenState extends State<ContactUsScreen> {
+  final TextEditingController _messageController = TextEditingController();
+  String? _messageError;
 
   @override
   Widget build(BuildContext context) {
@@ -34,25 +43,40 @@ class ContactUsScreen extends StatelessWidget {
               ],
             ),
             child: SafeArea(
-              child: Row(
+              child: Column(
                 children: [
                   Expanded(
-                    child: Container(
-                      padding: EdgeInsets.symmetric(horizontal: 16),
-                      decoration: BoxDecoration(
-                        color: Colors.grey[200],
-                        borderRadius: BorderRadius.circular(25),
-                      ),
-                      child: TextField(
-                        decoration: InputDecoration(
-                          hintText: 'Type your message...',
-                          border: InputBorder.none,
-                          hintStyle: TextStyle(
-                            color: Colors.grey[500],
-                            fontSize: 14,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        TextField(
+                          controller: _messageController,
+                          onChanged: (value) {
+                            setState(() {
+                              _messageError = Validators.validateMessage(value);
+                            });
+                          },
+                          decoration: InputDecoration(
+                            hintText: 'Type your message...',
+                            border: InputBorder.none,
+                            hintStyle: TextStyle(
+                              color: Colors.grey[500],
+                              fontSize: 14,
+                            ),
                           ),
                         ),
-                      ),
+                        if (_messageError != null)
+                          Padding(
+                            padding: const EdgeInsets.only(left: 16, top: 4),
+                            child: Text(
+                              _messageError!,
+                              style: const TextStyle(
+                                color: Colors.red,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ),
+                      ],
                     ),
                   ),
                   SizedBox(width: 12),
@@ -64,7 +88,25 @@ class ContactUsScreen extends StatelessWidget {
                     child: IconButton(
                       icon: Icon(Icons.send, color: Colors.white, size: 20),
                       onPressed: () {
-                        print('Send message');
+                        // Validate message
+                        setState(() {
+                          _messageError = Validators.validateMessage(
+                            _messageController.text,
+                          );
+                        });
+
+                        // Check if validation passed
+                        if (_messageError == null) {
+                          // Show success message
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Message sent successfully!'),
+                              backgroundColor: Colors.green,
+                            ),
+                          );
+                          // Clear message
+                          _messageController.clear();
+                        }
                       },
                     ),
                   ),

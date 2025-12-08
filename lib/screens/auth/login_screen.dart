@@ -3,6 +3,7 @@ import 'package:mob_project/screens/home/main_screen.dart';
 import 'package:mob_project/screens/auth/signup_screen.dart';
 import 'package:mob_project/widgets/widgets.dart';
 import 'package:mob_project/constants/constants.dart';
+import 'package:mob_project/utils/validators.dart';
 
 class loginScreen extends StatefulWidget {
   const loginScreen({super.key});
@@ -15,6 +16,9 @@ class _loginScreenState extends State<loginScreen> {
   bool _isPasswordVisible = false;
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+  String? _emailError;
+  String? _passwordError;
 
   // Define colors from the design
   final Color _bgTopColor = const Color(0xFF8AE4FF); // Light blue top
@@ -46,172 +50,232 @@ class _loginScreenState extends State<loginScreen> {
               horizontal: 30.0,
               vertical: 20.0,
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                // ...existing code...
-                // Option A — use screen width fraction
-                Image.asset(
-                  'assets/images/logo.png',
-                  width: size.width * 0.6, // 60% of screen width
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  // ...existing code...
+                  // Option A — use screen width fraction
+                  Image.asset(
+                    'assets/images/logo.png',
+                    width: size.width * 0.6, // 60% of screen width
 
-                  fit: BoxFit.contain,
-                ),
-                // ...existing code...
-                const SizedBox(),
-                Text(
-                  "Login to your account to continue.",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.blueGrey[800],
+                    fit: BoxFit.contain,
                   ),
-                ),
-                const SizedBox(height: 40),
-
-                // --- Input Fields ---
-                _buildLabel("USERNAME OR EMAIL"),
-                const SizedBox(height: 8),
-                CustomTextField(
-                  controller: _emailController,
-                  hintText: "Enter your Username or Email address",
-                  fillColor: _inputFillColor,
-                ),
-                const SizedBox(height: 20),
-
-                _buildLabel("PASSWORD"),
-                const SizedBox(height: 8),
-                CustomTextField(
-                  controller: _passwordController,
-                  hintText: "Enter your Password",
-                  obscureText: !_isPasswordVisible,
-                  fillColor: _inputFillColor,
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      _isPasswordVisible
-                          ? Icons.visibility
-                          : Icons.visibility_off,
-                      color: Colors.grey[600],
+                  // ...existing code...
+                  const SizedBox(),
+                  Text(
+                    "Login to your account to continue.",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.blueGrey[800],
                     ),
+                  ),
+                  const SizedBox(height: 40),
+
+                  // --- Input Fields ---
+                  _buildLabel("USERNAME OR EMAIL"),
+                  const SizedBox(height: 8),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      CustomTextField(
+                        controller: _emailController,
+                        hintText: "Enter your Username or Email address",
+                        fillColor: _inputFillColor,
+                        onChanged: (value) {
+                          setState(() {
+                            _emailError = Validators.validateEmailOrUsername(
+                              value,
+                            );
+                          });
+                        },
+                      ),
+                      if (_emailError != null)
+                        Padding(
+                          padding: const EdgeInsets.only(left: 16, top: 4),
+                          child: Text(
+                            _emailError!,
+                            style: const TextStyle(
+                              color: Colors.red,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+
+                  _buildLabel("PASSWORD"),
+                  const SizedBox(height: 8),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      CustomTextField(
+                        controller: _passwordController,
+                        hintText: "Enter your Password",
+                        obscureText: !_isPasswordVisible,
+                        fillColor: _inputFillColor,
+                        onChanged: (value) {
+                          setState(() {
+                            _passwordError = Validators.validatePassword(value);
+                          });
+                        },
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            _isPasswordVisible
+                                ? Icons.visibility
+                                : Icons.visibility_off,
+                            color: Colors.grey[600],
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              _isPasswordVisible = !_isPasswordVisible;
+                            });
+                          },
+                        ),
+                      ),
+                      if (_passwordError != null)
+                        Padding(
+                          padding: const EdgeInsets.only(left: 16, top: 4),
+                          child: Text(
+                            _passwordError!,
+                            style: const TextStyle(
+                              color: Colors.red,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+
+                  // --- Forgot Password ---
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton(
+                      onPressed: () {},
+                      child: Text(
+                        "Forget Password?",
+                        style: TextStyle(
+                          color: Colors.grey[700],
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+
+                  // --- Login Button ---
+                  CustomButton(
+                    text: "LOGIN",
                     onPressed: () {
+                      // Validate all fields
                       setState(() {
-                        _isPasswordVisible = !_isPasswordVisible;
+                        _emailError = Validators.validateEmailOrUsername(
+                          _emailController.text,
+                        );
+                        _passwordError = Validators.validatePassword(
+                          _passwordController.text,
+                        );
                       });
-                    },
-                  ),
-                ),
 
-                // --- Forgot Password ---
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: TextButton(
-                    onPressed: () {},
-                    child: Text(
-                      "Forget Password?",
-                      style: TextStyle(
-                        color: Colors.grey[700],
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 10),
-
-                // --- Login Button ---
-                CustomButton(
-                  text: "LOGIN",
-                  onPressed: () {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const mainScreen(),
-                      ),
-                    );
-                  },
-                  backgroundColor: _buttonColor,
-                  height: 50,
-                ),
-                const SizedBox(height: 20),
-
-                // --- Sign Up Link ---
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      "Don't have an account ? ",
-                      style: TextStyle(
-                        color: Colors.grey[700],
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.push(
+                      // Check if validation passed
+                      if (_emailError == null && _passwordError == null) {
+                        Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => const signupScreen(),
+                            builder: (context) => const mainScreen(),
                           ),
                         );
-                      },
-                      child: Text(
-                        "SIGN UP",
+                      }
+                    },
+                    backgroundColor: _buttonColor,
+                    height: 50,
+                  ),
+                  const SizedBox(height: 20),
+
+                  // --- Sign Up Link ---
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        "Don't have an account ? ",
                         style: TextStyle(
-                          color: Colors.grey[900],
+                          color: Colors.grey[700],
                           fontSize: 14,
-                          fontWeight: FontWeight.w900,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 30),
-
-                // --- OR Divider ---
-                Row(
-                  children: [
-                    const Expanded(
-                      child: Divider(color: Colors.black54, thickness: 1.2),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 10),
-                      child: Text(
-                        "or",
-                        style: const TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const signupScreen(),
+                            ),
+                          );
+                        },
+                        child: Text(
+                          "SIGN UP",
+                          style: TextStyle(
+                            color: Colors.grey[900],
+                            fontSize: 14,
+                            fontWeight: FontWeight.w900,
+                          ),
                         ),
                       ),
-                    ),
-                    const Expanded(
-                      child: Divider(color: Colors.black54, thickness: 1.2),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 30),
+                    ],
+                  ),
+                  const SizedBox(height: 30),
 
-                // --- Social Buttons ---
-                SocialLoginButton(
-                  text: "Continue with Google",
-                  icon: Image.network(
-                    'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/120px-Google_%22G%22_logo.svg.png',
-                    height: 24,
+                  // --- OR Divider ---
+                  Row(
+                    children: [
+                      const Expanded(
+                        child: Divider(color: Colors.black54, thickness: 1.2),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 10),
+                        child: Text(
+                          "or",
+                          style: const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
+                          ),
+                        ),
+                      ),
+                      const Expanded(
+                        child: Divider(color: Colors.black54, thickness: 1.2),
+                      ),
+                    ],
                   ),
-                  onPressed: () {},
-                ),
-                const SizedBox(height: 15),
-                SocialLoginButton(
-                  text: "Continue with Facebook",
-                  icon: Image.network(
-                    'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b8/2021_Facebook_icon.svg/150px-2021_Facebook_icon.svg.png',
-                    height: 24,
+                  const SizedBox(height: 30),
+
+                  // --- Social Buttons ---
+                  SocialLoginButton(
+                    text: "Continue with Google",
+                    icon: Image.network(
+                      'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/120px-Google_%22G%22_logo.svg.png',
+                      height: 24,
+                    ),
+                    onPressed: () {},
                   ),
-                  onPressed: () {},
-                ),
-                const SizedBox(height: 40),
-              ],
+                  const SizedBox(height: 15),
+                  SocialLoginButton(
+                    text: "Continue with Facebook",
+                    icon: Image.network(
+                      'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b8/2021_Facebook_icon.svg/150px-2021_Facebook_icon.svg.png',
+                      height: 24,
+                    ),
+                    onPressed: () {},
+                  ),
+                  const SizedBox(height: 40),
+                ],
+              ),
             ),
           ),
         ),

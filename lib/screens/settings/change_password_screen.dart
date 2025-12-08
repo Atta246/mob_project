@@ -1,9 +1,26 @@
 import 'package:flutter/material.dart';
 import '../../widgets/widgets.dart';
 import '../home/main_screen.dart';
+import 'package:mob_project/utils/validators.dart';
 
-class ChangePasswordScreen extends StatelessWidget {
+class ChangePasswordScreen extends StatefulWidget {
   const ChangePasswordScreen({super.key});
+
+  @override
+  State<ChangePasswordScreen> createState() => _ChangePasswordScreenState();
+}
+
+class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
+  final TextEditingController _oldPasswordController = TextEditingController();
+  final TextEditingController _newPasswordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
+  String? _oldPasswordError;
+  String? _newPasswordError;
+  String? _confirmPasswordError;
+  bool _isOldPasswordVisible = false;
+  bool _isNewPasswordVisible = false;
+  bool _isConfirmPasswordVisible = false;
 
   @override
   Widget build(BuildContext context) {
@@ -27,22 +44,112 @@ class ChangePasswordScreen extends StatelessWidget {
               child: IntrinsicHeight(
                 child: Column(
                   children: [
-                    InputField(
-                      icon: Icons.lock_outline,
-                      label: 'Old Password',
-                      value: '••••••••',
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildPasswordField(
+                          icon: Icons.lock_outline,
+                          label: 'Old Password',
+                          controller: _oldPasswordController,
+                          isVisible: _isOldPasswordVisible,
+                          onVisibilityToggle: () {
+                            setState(() {
+                              _isOldPasswordVisible = !_isOldPasswordVisible;
+                            });
+                          },
+                          onChanged: (value) {
+                            setState(() {
+                              _oldPasswordError = Validators.validatePassword(
+                                value,
+                              );
+                            });
+                          },
+                        ),
+                        if (_oldPasswordError != null)
+                          Padding(
+                            padding: const EdgeInsets.only(left: 16, top: 4),
+                            child: Text(
+                              _oldPasswordError!,
+                              style: const TextStyle(
+                                color: Colors.red,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ),
+                      ],
                     ),
                     SizedBox(height: 16),
-                    InputField(
-                      icon: Icons.lock_outline,
-                      label: 'New Password',
-                      value: '••••••••',
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildPasswordField(
+                          icon: Icons.lock_outline,
+                          label: 'New Password',
+                          controller: _newPasswordController,
+                          isVisible: _isNewPasswordVisible,
+                          onVisibilityToggle: () {
+                            setState(() {
+                              _isNewPasswordVisible = !_isNewPasswordVisible;
+                            });
+                          },
+                          onChanged: (value) {
+                            setState(() {
+                              _newPasswordError = Validators.validatePassword(
+                                value,
+                              );
+                            });
+                          },
+                        ),
+                        if (_newPasswordError != null)
+                          Padding(
+                            padding: const EdgeInsets.only(left: 16, top: 4),
+                            child: Text(
+                              _newPasswordError!,
+                              style: const TextStyle(
+                                color: Colors.red,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ),
+                      ],
                     ),
                     SizedBox(height: 16),
-                    InputField(
-                      icon: Icons.lock_outline,
-                      label: 'Confirm Password',
-                      value: '••••••••',
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildPasswordField(
+                          icon: Icons.lock_outline,
+                          label: 'Confirm Password',
+                          controller: _confirmPasswordController,
+                          isVisible: _isConfirmPasswordVisible,
+                          onVisibilityToggle: () {
+                            setState(() {
+                              _isConfirmPasswordVisible =
+                                  !_isConfirmPasswordVisible;
+                            });
+                          },
+                          onChanged: (value) {
+                            setState(() {
+                              _confirmPasswordError =
+                                  Validators.validateConfirmPassword(
+                                    value,
+                                    _newPasswordController.text,
+                                  );
+                            });
+                          },
+                        ),
+                        if (_confirmPasswordError != null)
+                          Padding(
+                            padding: const EdgeInsets.only(left: 16, top: 4),
+                            child: Text(
+                              _confirmPasswordError!,
+                              style: const TextStyle(
+                                color: Colors.red,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ),
+                      ],
                     ),
                     Spacer(),
                     SizedBox(
@@ -50,7 +157,37 @@ class ChangePasswordScreen extends StatelessWidget {
                       height: 65,
                       child: ElevatedButton(
                         onPressed: () {
-                          print('Save tapped');
+                          // Validate all fields
+                          setState(() {
+                            _oldPasswordError = Validators.validatePassword(
+                              _oldPasswordController.text,
+                            );
+                            _newPasswordError = Validators.validatePassword(
+                              _newPasswordController.text,
+                            );
+                            _confirmPasswordError =
+                                Validators.validateConfirmPassword(
+                                  _confirmPasswordController.text,
+                                  _newPasswordController.text,
+                                );
+                          });
+
+                          // Check if validation passed
+                          if (_oldPasswordError == null &&
+                              _newPasswordError == null &&
+                              _confirmPasswordError == null) {
+                            // Show success message
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Password changed successfully!'),
+                                backgroundColor: Colors.green,
+                              ),
+                            );
+                            // Clear fields
+                            _oldPasswordController.clear();
+                            _newPasswordController.clear();
+                            _confirmPasswordController.clear();
+                          }
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.lightBlue,
@@ -80,7 +217,7 @@ class ChangePasswordScreen extends StatelessWidget {
         currentIndex: 2,
         onTap: (index) {
           if (index == 2) {
-            Navigator.popUntil(context, (route) => route.isFirst);
+            Navigator.pop(context, (route) => route.isFirst);
           } else {
             Navigator.pushAndRemoveUntil(
               context,
@@ -91,6 +228,61 @@ class ChangePasswordScreen extends StatelessWidget {
             );
           }
         },
+      ),
+    );
+  }
+
+  Widget _buildPasswordField({
+    required IconData icon,
+    required String label,
+    required TextEditingController controller,
+    required bool isVisible,
+    required VoidCallback onVisibilityToggle,
+    required void Function(String) onChanged,
+  }) {
+    return Container(
+      constraints: BoxConstraints(minHeight: 60),
+      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: Colors.grey[100],
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, color: Colors.grey[600], size: 24),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                ),
+                const SizedBox(height: 4),
+                TextField(
+                  controller: controller,
+                  obscureText: !isVisible,
+                  onChanged: onChanged,
+                  decoration: const InputDecoration(
+                    border: InputBorder.none,
+                    isDense: true,
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                  style: const TextStyle(fontSize: 16, color: Colors.black87),
+                ),
+              ],
+            ),
+          ),
+          IconButton(
+            icon: Icon(
+              isVisible ? Icons.visibility : Icons.visibility_off,
+              size: 20,
+              color: Colors.grey[600],
+            ),
+            onPressed: onVisibilityToggle,
+          ),
+        ],
       ),
     );
   }

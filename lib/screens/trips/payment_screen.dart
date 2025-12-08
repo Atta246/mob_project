@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mob_project/widgets/widgets.dart';
 import 'package:mob_project/screens/trips/ticket_screen.dart';
+import 'package:mob_project/utils/validators.dart';
 
 class PaymentScreen extends StatefulWidget {
   const PaymentScreen({super.key});
@@ -11,6 +12,12 @@ class PaymentScreen extends StatefulWidget {
 
 class _PaymentScreenState extends State<PaymentScreen> {
   int _selectedPayment = 0;
+  final TextEditingController _cardNumberController = TextEditingController();
+  final TextEditingController _expiryController = TextEditingController();
+  final TextEditingController _cvvController = TextEditingController();
+  String? _cardNumberError;
+  String? _expiryError;
+  String? _cvvError;
 
   @override
   Widget build(BuildContext context) {
@@ -43,46 +50,119 @@ class _PaymentScreenState extends State<PaymentScreen> {
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
                   ),
                   const SizedBox(height: 10),
-                  TextField(
-                    decoration: InputDecoration(
-                      hintText: '4526 1234 7895 6257',
-                      filled: true,
-                      fillColor: Colors.grey[100],
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide.none,
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      TextField(
+                        controller: _cardNumberController,
+                        keyboardType: TextInputType.number,
+                        onChanged: (value) {
+                          setState(() {
+                            _cardNumberError = Validators.validateCardNumber(
+                              value,
+                            );
+                          });
+                        },
+                        decoration: InputDecoration(
+                          hintText: '4526 1234 7895 6257',
+                          filled: true,
+                          fillColor: Colors.grey[100],
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                            borderSide: BorderSide.none,
+                          ),
+                        ),
                       ),
-                    ),
+                      if (_cardNumberError != null)
+                        Padding(
+                          padding: const EdgeInsets.only(left: 4, top: 4),
+                          child: Text(
+                            _cardNumberError!,
+                            style: const TextStyle(
+                              color: Colors.red,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ),
+                    ],
                   ),
                   const SizedBox(height: 10),
                   Row(
                     children: [
                       Expanded(
-                        child: TextField(
-                          decoration: InputDecoration(
-                            hintText: 'MM/YY',
-                            filled: true,
-                            fillColor: Colors.grey[100],
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
-                              borderSide: BorderSide.none,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            TextField(
+                              controller: _expiryController,
+                              keyboardType: TextInputType.datetime,
+                              onChanged: (value) {
+                                setState(() {
+                                  _expiryError = Validators.validateExpiryDate(
+                                    value,
+                                  );
+                                });
+                              },
+                              decoration: InputDecoration(
+                                hintText: 'MM/YY',
+                                filled: true,
+                                fillColor: Colors.grey[100],
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                  borderSide: BorderSide.none,
+                                ),
+                              ),
                             ),
-                          ),
+                            if (_expiryError != null)
+                              Padding(
+                                padding: const EdgeInsets.only(left: 4, top: 4),
+                                child: Text(
+                                  _expiryError!,
+                                  style: const TextStyle(
+                                    color: Colors.red,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ),
+                          ],
                         ),
                       ),
                       const SizedBox(width: 10),
                       Expanded(
-                        child: TextField(
-                          decoration: InputDecoration(
-                            hintText: 'CVC',
-                            filled: true,
-                            fillColor: Colors.grey[100],
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
-                              borderSide: BorderSide.none,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            TextField(
+                              controller: _cvvController,
+                              keyboardType: TextInputType.number,
+                              onChanged: (value) {
+                                setState(() {
+                                  _cvvError = Validators.validateCVV(value);
+                                });
+                              },
+                              decoration: InputDecoration(
+                                hintText: 'CVC',
+                                filled: true,
+                                fillColor: Colors.grey[100],
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                  borderSide: BorderSide.none,
+                                ),
+                                suffixIcon: Icon(Icons.credit_card, size: 18),
+                              ),
                             ),
-                            suffixIcon: Icon(Icons.credit_card, size: 18),
-                          ),
+                            if (_cvvError != null)
+                              Padding(
+                                padding: const EdgeInsets.only(left: 4, top: 4),
+                                child: Text(
+                                  _cvvError!,
+                                  style: const TextStyle(
+                                    color: Colors.red,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ),
+                          ],
                         ),
                       ),
                     ],
@@ -151,14 +231,43 @@ class _PaymentScreenState extends State<PaymentScreen> {
                   elevation: 0,
                 ),
                 onPressed: () {
-                  final bookingId =
-                      'BK-${DateTime.now().millisecondsSinceEpoch}';
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => TicketPage(bookingId: bookingId),
-                    ),
-                  );
+                  // Validate card information if Credit Card is selected
+                  if (_selectedPayment == 0) {
+                    setState(() {
+                      _cardNumberError = Validators.validateCardNumber(
+                        _cardNumberController.text,
+                      );
+                      _expiryError = Validators.validateExpiryDate(
+                        _expiryController.text,
+                      );
+                      _cvvError = Validators.validateCVV(_cvvController.text);
+                    });
+
+                    // Check if validation passed
+                    if (_cardNumberError == null &&
+                        _expiryError == null &&
+                        _cvvError == null) {
+                      final bookingId =
+                          'BK-${DateTime.now().millisecondsSinceEpoch}';
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              TicketPage(bookingId: bookingId),
+                        ),
+                      );
+                    }
+                  } else {
+                    // For other payment methods, proceed directly
+                    final bookingId =
+                        'BK-${DateTime.now().millisecondsSinceEpoch}';
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => TicketPage(bookingId: bookingId),
+                      ),
+                    );
+                  }
                 },
                 child: const Text(
                   'Confirm Booking',

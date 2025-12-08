@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:mob_project/screens/home/main_screen.dart';
 import 'package:mob_project/widgets/widgets.dart';
 import 'package:mob_project/constants/constants.dart';
+import 'package:mob_project/utils/validators.dart';
 
 // ignore: camel_case_types
 class signupScreen extends StatefulWidget {
@@ -16,6 +17,10 @@ class _signupScreenState extends State<signupScreen> {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+  String? _usernameError;
+  String? _emailError;
+  String? _passwordError;
 
   // Define colors from the design (reused)
   final Color _bgTopColor = const Color(0xFF8AE4FF);
@@ -43,150 +48,236 @@ class _signupScreenState extends State<signupScreen> {
               horizontal: 30.0,
               vertical: 20.0,
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                // Back button to go back to Login (Optional, but good UX)
-                Align(
-                  alignment: Alignment.topLeft,
-                  child: IconButton(
-                    icon: const Icon(Icons.arrow_back, color: Colors.black54),
-                    onPressed: () => Navigator.pop(context),
-                  ),
-                ),
-
-                // --- Logo Section ---
-                Image.asset(
-                  'assets/images/logo.png',
-                  height: MediaQuery.of(context).size.height * 0.12,
-                ),
-                const SizedBox(height: 20),
-                Text(
-                  "Create New Account",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.w800,
-                    color: Colors.blueGrey[900],
-                  ),
-                ),
-                const SizedBox(height: 40),
-
-                // --- Input Fields ---
-
-                // 1. Username
-                _buildLabel("USERNAME"),
-                const SizedBox(height: 8),
-                _buildTextField(
-                  controller: _usernameController,
-                  hintText:
-                      "", // Image shows empty hint, but you can add "Enter Username"
-                ),
-                const SizedBox(height: 20),
-
-                // 2. Email
-                _buildLabel("EMAIL"),
-                const SizedBox(height: 8),
-                _buildTextField(controller: _emailController, hintText: ""),
-                const SizedBox(height: 20),
-
-                // 3. Password
-                _buildLabel("PASSWORD"),
-                const SizedBox(height: 8),
-                _buildTextField(
-                  controller: _passwordController,
-                  hintText: "",
-                  obscureText: !_isPasswordVisible,
-                  icon: IconButton(
-                    icon: Icon(
-                      _isPasswordVisible
-                          ? Icons.visibility
-                          : Icons.visibility_off,
-                      color: Colors.grey[600],
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  // Back button to go back to Login (Optional, but good UX)
+                  Align(
+                    alignment: Alignment.topLeft,
+                    child: IconButton(
+                      icon: const Icon(Icons.arrow_back, color: Colors.black54),
+                      onPressed: () => Navigator.pop(context),
                     ),
-                    onPressed: () {
-                      setState(() {
-                        _isPasswordVisible = !_isPasswordVisible;
-                      });
-                    },
                   ),
-                ),
 
-                // --- Forgot Password ---
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: TextButton(
-                    onPressed: () {},
-                    child: Text(
-                      "Forget Password?",
-                      style: TextStyle(
-                        color: Colors.grey[700],
-                        fontWeight: FontWeight.w600,
+                  // --- Logo Section ---
+                  Image.asset(
+                    'assets/images/logo.png',
+                    height: MediaQuery.of(context).size.height * 0.12,
+                  ),
+                  const SizedBox(height: 20),
+                  Text(
+                    "Create New Account",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.w800,
+                      color: Colors.blueGrey[900],
+                    ),
+                  ),
+                  const SizedBox(height: 40),
+
+                  // --- Input Fields ---
+
+                  // 1. Username
+                  _buildLabel("USERNAME"),
+                  const SizedBox(height: 8),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildTextField(
+                        controller: _usernameController,
+                        hintText: "",
+                        onChanged: (value) {
+                          setState(() {
+                            _usernameError = Validators.validateUsername(value);
+                          });
+                        },
                       ),
-                    ),
+                      if (_usernameError != null)
+                        Padding(
+                          padding: const EdgeInsets.only(left: 16, top: 4),
+                          child: Text(
+                            _usernameError!,
+                            style: const TextStyle(
+                              color: Colors.red,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ),
+                    ],
                   ),
-                ),
-                const SizedBox(height: 10),
+                  const SizedBox(height: 20),
 
-                // --- Sign Up Button ---
-                CustomButton(
-                  text: "SIGN UP",
-                  onPressed: () {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const mainScreen(),
+                  // 2. Email
+                  _buildLabel("EMAIL"),
+                  const SizedBox(height: 8),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildTextField(
+                        controller: _emailController,
+                        hintText: "",
+                        onChanged: (value) {
+                          setState(() {
+                            _emailError = Validators.validateEmail(value);
+                          });
+                        },
                       ),
-                    );
-                  },
-                  backgroundColor: _buttonColor,
-                  height: 50,
-                ),
+                      if (_emailError != null)
+                        Padding(
+                          padding: const EdgeInsets.only(left: 16, top: 4),
+                          child: Text(
+                            _emailError!,
+                            style: const TextStyle(
+                              color: Colors.red,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
 
-                const SizedBox(height: 30),
+                  // 3. Password
+                  _buildLabel("PASSWORD"),
+                  const SizedBox(height: 8),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildTextField(
+                        controller: _passwordController,
+                        hintText: "",
+                        obscureText: !_isPasswordVisible,
+                        onChanged: (value) {
+                          setState(() {
+                            _passwordError = Validators.validatePassword(value);
+                          });
+                        },
+                        icon: IconButton(
+                          icon: Icon(
+                            _isPasswordVisible
+                                ? Icons.visibility
+                                : Icons.visibility_off,
+                            color: Colors.grey[600],
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              _isPasswordVisible = !_isPasswordVisible;
+                            });
+                          },
+                        ),
+                      ),
+                      if (_passwordError != null)
+                        Padding(
+                          padding: const EdgeInsets.only(left: 16, top: 4),
+                          child: Text(
+                            _passwordError!,
+                            style: const TextStyle(
+                              color: Colors.red,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
 
-                // --- OR Divider ---
-                const Row(
-                  children: [
-                    Expanded(
-                      child: Divider(color: Colors.black54, thickness: 1.2),
-                    ),
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 10),
+                  // --- Forgot Password ---
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton(
+                      onPressed: () {},
                       child: Text(
-                        "or",
+                        "Forget Password?",
                         style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
+                          color: Colors.grey[700],
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                     ),
-                    Expanded(
-                      child: Divider(color: Colors.black54, thickness: 1.2),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 30),
+                  ),
+                  const SizedBox(height: 10),
 
-                // --- Social Buttons ---
-                _buildSocialButton(
-                  text: "Sign in with Google",
-                  icon: Image.network(
-                    'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/120px-Google_%22G%22_logo.svg.png',
-                    height: 24,
+                  // --- Sign Up Button ---
+                  CustomButton(
+                    text: "SIGN UP",
+                    onPressed: () {
+                      // Validate all fields
+                      setState(() {
+                        _usernameError = Validators.validateUsername(
+                          _usernameController.text,
+                        );
+                        _emailError = Validators.validateEmail(
+                          _emailController.text,
+                        );
+                        _passwordError = Validators.validatePassword(
+                          _passwordController.text,
+                        );
+                      });
+
+                      // Check if validation passed
+                      if (_usernameError == null &&
+                          _emailError == null &&
+                          _passwordError == null) {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const mainScreen(),
+                          ),
+                        );
+                      }
+                    },
+                    backgroundColor: _buttonColor,
+                    height: 50,
                   ),
-                ),
-                const SizedBox(height: 15),
-                _buildSocialButton(
-                  text: "Sign in with Facebook",
-                  icon: Image.network(
-                    'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b8/2021_Facebook_icon.svg/150px-2021_Facebook_icon.svg.png',
-                    height: 24,
+
+                  const SizedBox(height: 30),
+
+                  // --- OR Divider ---
+                  const Row(
+                    children: [
+                      Expanded(
+                        child: Divider(color: Colors.black54, thickness: 1.2),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 10),
+                        child: Text(
+                          "or",
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        child: Divider(color: Colors.black54, thickness: 1.2),
+                      ),
+                    ],
                   ),
-                ),
-                const SizedBox(height: 40),
-              ],
+                  const SizedBox(height: 30),
+
+                  // --- Social Buttons ---
+                  _buildSocialButton(
+                    text: "Sign in with Google",
+                    icon: Image.network(
+                      'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/120px-Google_%22G%22_logo.svg.png',
+                      height: 24,
+                    ),
+                  ),
+                  const SizedBox(height: 15),
+                  _buildSocialButton(
+                    text: "Sign in with Facebook",
+                    icon: Image.network(
+                      'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b8/2021_Facebook_icon.svg/150px-2021_Facebook_icon.svg.png',
+                      height: 24,
+                    ),
+                  ),
+                  const SizedBox(height: 40),
+                ],
+              ),
             ),
           ),
         ),
@@ -216,6 +307,7 @@ class _signupScreenState extends State<signupScreen> {
     required String hintText,
     bool obscureText = false,
     Widget? icon,
+    void Function(String)? onChanged,
   }) {
     return Container(
       decoration: BoxDecoration(
@@ -230,6 +322,7 @@ class _signupScreenState extends State<signupScreen> {
       child: TextField(
         controller: controller,
         obscureText: obscureText,
+        onChanged: onChanged,
         decoration: InputDecoration(
           filled: true,
           fillColor: _inputFillColor,
