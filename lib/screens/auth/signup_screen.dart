@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:mob_project/screens/home/main_screen.dart';
 import 'package:mob_project/widgets/widgets.dart';
-import 'package:mob_project/constants/constants.dart';
 import 'package:mob_project/utils/validators.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:mob_project/widgets/common/success_dialog.dart';
+import 'package:mob_project/services/auth_service.dart';
 
 // ignore: camel_case_types
 class signupScreen extends StatefulWidget {
@@ -14,6 +15,7 @@ class signupScreen extends StatefulWidget {
 
 class _signupScreenState extends State<signupScreen> {
   bool _isPasswordVisible = false;
+  bool _isLoading = false;
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
@@ -21,6 +23,106 @@ class _signupScreenState extends State<signupScreen> {
   String? _usernameError;
   String? _emailError;
   String? _passwordError;
+
+  final AuthService _authService = AuthService();
+
+  Future<void> _signUpWithEmailPassword() async {
+    // Validate all fields first
+    setState(() {
+      _usernameError = Validators.validateUsername(_usernameController.text);
+      _emailError = Validators.validateEmail(_emailController.text);
+      _passwordError = Validators.validatePassword(_passwordController.text);
+    });
+
+    // Check if validation passed
+    if (_usernameError != null ||
+        _emailError != null ||
+        _passwordError != null) {
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      // Create user using AuthService
+      UserCredential userCredential = await _authService
+          .signUpWithEmailPassword(
+            email: _emailController.text.trim(),
+            password: _passwordController.text,
+            username: _usernameController.text.trim(),
+          );
+
+      // Send email verification
+      try {
+        await userCredential.user!.sendEmailVerification();
+        print('✅ Email verification sent to: ${userCredential.user!.email}');
+        print('✅ User UID: ${userCredential.user!.uid}');
+        print('✅ Email verified status: ${userCredential.user!.emailVerified}');
+      } catch (emailError) {
+        print('❌ Error sending verification email: $emailError');
+        // Don't throw error, just log it - user is still created
+      }
+
+      // Sign out the user so they have to verify email first
+      await _authService.signOut();
+
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+
+        // Show success dialog with verification message
+        await SuccessDialog.show(
+          context,
+          title: 'Verify Your Email!',
+          message:
+              'Account created successfully! We\'ve sent a verification link to ${_emailController.text.trim()}. Please verify your email before logging in.',
+          onOkPressed: () {
+            // Navigate back to login screen
+            Navigator.pop(context);
+          },
+        );
+      }
+    } on FirebaseAuthException catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(AuthService.getErrorMessage(e)),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: ${e.toString()}'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _usernameController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
 
   // Define colors from the design (reused)
   final Color _bgTopColor = const Color(0xFF8AE4FF);
@@ -203,34 +305,10 @@ class _signupScreenState extends State<signupScreen> {
                   // --- Sign Up Button ---
                   CustomButton(
                     text: "SIGN UP",
-                    onPressed: () {
-                      // Validate all fields
-                      setState(() {
-                        _usernameError = Validators.validateUsername(
-                          _usernameController.text,
-                        );
-                        _emailError = Validators.validateEmail(
-                          _emailController.text,
-                        );
-                        _passwordError = Validators.validatePassword(
-                          _passwordController.text,
-                        );
-                      });
-
-                      // Check if validation passed
-                      if (_usernameError == null &&
-                          _emailError == null &&
-                          _passwordError == null) {
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const mainScreen(),
-                          ),
-                        );
-                      }
-                    },
+                    onPressed: _isLoading ? () {} : _signUpWithEmailPassword,
                     backgroundColor: _buttonColor,
                     height: 50,
+                    isLoading: _isLoading,
                   ),
 
                   const SizedBox(height: 30),

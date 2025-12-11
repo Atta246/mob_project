@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:mob_project/screens/auth/login_screen.dart';
 import 'package:mob_project/screens/auth/signup_screen.dart';
+import 'package:mob_project/services/auth_service.dart';
 import '../../widgets/widgets.dart';
+import '../../widgets/common/success_dialog.dart';
 import 'edit_profile_screen.dart';
 import 'change_password_screen.dart';
 import '../home/main_screen.dart';
 
 class SettingsDetailScreen extends StatelessWidget {
-  const SettingsDetailScreen({super.key});
+  SettingsDetailScreen({super.key});
+
+  final AuthService _authService = AuthService();
 
   @override
   Widget build(BuildContext context) {
@@ -66,12 +70,7 @@ class SettingsDetailScreen extends StatelessWidget {
               width: double.infinity,
               height: MediaQuery.of(context).size.height * 0.07,
               child: ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => loginScreen()),
-                  );
-                },
+                onPressed: () => _logout(context),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.blue,
                   shape: RoundedRectangleBorder(
@@ -108,6 +107,36 @@ class SettingsDetailScreen extends StatelessWidget {
         },
       ),
     );
+  }
+
+  Future<void> _logout(BuildContext context) async {
+    try {
+      // Sign out from all providers (Google, Email, etc.)
+      await _authService.signOut();
+
+      if (context.mounted) {
+        await SuccessDialog.show(
+          context,
+          title: 'Goodbye!',
+          message: 'You have been successfully logged out.',
+          onOkPressed: () {
+            Navigator.of(context).pushAndRemoveUntil(
+              MaterialPageRoute(builder: (context) => const loginScreen()),
+              (route) => false,
+            );
+          },
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error logging out: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   Widget _buildMenuItem(

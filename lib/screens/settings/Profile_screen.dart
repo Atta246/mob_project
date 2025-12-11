@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mob_project/screens/settings/support_screen.dart';
 import 'package:mob_project/screens/trips/mytrips_screen.dart';
-import '../../widgets/widgets.dart';
 import 'settings_screen.dart';
 
 class Setting_page extends StatelessWidget {
@@ -185,7 +184,12 @@ class Setting_page extends StatelessWidget {
     );
   }
 
-  Widget _buildMenuItem(IconData icon, String label, VoidCallback onTap) {
+  Widget _buildMenuItem(
+    IconData icon,
+    String label,
+    VoidCallback onTap, {
+    Color? color,
+  }) {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -204,7 +208,7 @@ class Setting_page extends StatelessWidget {
             padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             child: Row(
               children: [
-                Icon(icon, color: Colors.grey[700], size: 28),
+                Icon(icon, color: color ?? Colors.grey[700], size: 28),
                 SizedBox(width: 16),
                 Expanded(
                   child: Text(
@@ -212,7 +216,7 @@ class Setting_page extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w500,
-                      color: Colors.black87,
+                      color: color ?? Colors.black87,
                     ),
                   ),
                 ),

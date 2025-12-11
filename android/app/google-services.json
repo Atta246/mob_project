@@ -1,36 +1,26 @@
 {
   "project_info": {
-    "project_number": "725074197126",
-    "project_id": "skyfly-edbac",
-    "storage_bucket": "skyfly-edbac.firebasestorage.app"
+    "project_number": "391308780574",
+    "project_id": "newskyfly-e5731",
+    "storage_bucket": "newskyfly-e5731.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:725074197126:android:17f33c3c6ff8d450ccef07",
+        "mobilesdk_app_id": "1:391308780574:android:e7e2cf0af67b955ea4ba0f",
         "android_client_info": {
           "package_name": "com.example.mob_project"
         }
       },
-      "oauth_client": [
-        {
-          "client_id": "725074197126-lmf926qvc5h8bf8tf4hh0ot90fmrtdel.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
+      "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyA2T-_WTktL6fL5MWyWNcd9fbAmpd4cEhA"
+          "current_key": "AIzaSyADgkhI3J83NEw3ZCse0FpJvkLJGIkXtmg"
         }
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": [
-            {
-              "client_id": "725074197126-lmf926qvc5h8bf8tf4hh0ot90fmrtdel.apps.googleusercontent.com",
-              "client_type": 3
-            }
-          ]
+          "other_platform_oauth_client": []
         }
       }
     }

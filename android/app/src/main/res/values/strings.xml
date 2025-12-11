@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- App Name -->
+    <string name="app_name">Sky Fly</string>
+    
+    <!-- Facebook App credentials from https://developers.facebook.com/apps -->
+    
+    <string name="facebook_app_id">1732180337478314</string>
+    <string name="facebook_client_token">f1122a1292977a78944a7e984b5ed1d5</string>
+    <string name="fb_login_protocol_scheme">fb1732180337478314</string>
+</resources>

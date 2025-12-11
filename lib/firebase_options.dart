@@ -41,50 +41,49 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyA5g4hWbAbyNGLXkX4477k19Zvd98MkvgI',
-    appId: '1:725074197126:web:c9460e0c3c6a12daccef07',
-    messagingSenderId: '725074197126',
-    projectId: 'skyfly-edbac',
-    authDomain: 'skyfly-edbac.firebaseapp.com',
-    storageBucket: 'skyfly-edbac.firebasestorage.app',
-    measurementId: 'G-289RB8MFKJ',
+    apiKey: 'AIzaSyBCrT35mqHTARj2fm2o4UmfZtVet6M-2bo',
+    appId: '1:391308780574:web:8598182f69df2b63a4ba0f',
+    messagingSenderId: '391308780574',
+    projectId: 'newskyfly-e5731',
+    authDomain: 'newskyfly-e5731.firebaseapp.com',
+    storageBucket: 'newskyfly-e5731.firebasestorage.app',
+    measurementId: 'G-K4FL00H5Z1',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyA2T-_WTktL6fL5MWyWNcd9fbAmpd4cEhA',
-    appId: '1:725074197126:android:17f33c3c6ff8d450ccef07',
-    messagingSenderId: '725074197126',
-    projectId: 'skyfly-edbac',
-    storageBucket: 'skyfly-edbac.firebasestorage.app',
+    apiKey: 'AIzaSyADgkhI3J83NEw3ZCse0FpJvkLJGIkXtmg',
+    appId: '1:391308780574:android:e7e2cf0af67b955ea4ba0f',
+    messagingSenderId: '391308780574',
+    projectId: 'newskyfly-e5731',
+    storageBucket: 'newskyfly-e5731.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyBeK96bhPNTLaQOmLtdlRYA8yiDZXij-O0',
-    appId: '1:725074197126:ios:7564db504bcc97e5ccef07',
-    messagingSenderId: '725074197126',
-    projectId: 'skyfly-edbac',
-    storageBucket: 'skyfly-edbac.firebasestorage.app',
-    iosClientId: '725074197126-pi39c3mboq7ptfnqapsjn8uag6gs4cha.apps.googleusercontent.com',
+    apiKey: 'AIzaSyD1n4RODkxT7nolKg0BO6TdCBYnKWpYTVQ',
+    appId: '1:391308780574:ios:d56a1e614bfc6b89a4ba0f',
+    messagingSenderId: '391308780574',
+    projectId: 'newskyfly-e5731',
+    storageBucket: 'newskyfly-e5731.firebasestorage.app',
     iosBundleId: 'com.example.mobProject',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyBeK96bhPNTLaQOmLtdlRYA8yiDZXij-O0',
-    appId: '1:725074197126:ios:7564db504bcc97e5ccef07',
-    messagingSenderId: '725074197126',
-    projectId: 'skyfly-edbac',
-    storageBucket: 'skyfly-edbac.firebasestorage.app',
-    iosClientId: '725074197126-pi39c3mboq7ptfnqapsjn8uag6gs4cha.apps.googleusercontent.com',
+    apiKey: 'AIzaSyD1n4RODkxT7nolKg0BO6TdCBYnKWpYTVQ',
+    appId: '1:391308780574:ios:d56a1e614bfc6b89a4ba0f',
+    messagingSenderId: '391308780574',
+    projectId: 'newskyfly-e5731',
+    storageBucket: 'newskyfly-e5731.firebasestorage.app',
     iosBundleId: 'com.example.mobProject',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
-    apiKey: 'AIzaSyA5g4hWbAbyNGLXkX4477k19Zvd98MkvgI',
-    appId: '1:725074197126:web:9dbc7f3b4065d92dccef07',
-    messagingSenderId: '725074197126',
-    projectId: 'skyfly-edbac',
-    authDomain: 'skyfly-edbac.firebaseapp.com',
-    storageBucket: 'skyfly-edbac.firebasestorage.app',
-    measurementId: 'G-DBHMM9JZQS',
+    apiKey: 'AIzaSyBCrT35mqHTARj2fm2o4UmfZtVet6M-2bo',
+    appId: '1:391308780574:web:862126fb98ac12daa4ba0f',
+    messagingSenderId: '391308780574',
+    projectId: 'newskyfly-e5731',
+    authDomain: 'newskyfly-e5731.firebaseapp.com',
+    storageBucket: 'newskyfly-e5731.firebasestorage.app',
+    measurementId: 'G-5PCTC2K8L8',
   );
+
 }

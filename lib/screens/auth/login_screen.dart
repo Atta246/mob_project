@@ -2,8 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:mob_project/screens/home/main_screen.dart';
 import 'package:mob_project/screens/auth/signup_screen.dart';
 import 'package:mob_project/widgets/widgets.dart';
-import 'package:mob_project/constants/constants.dart';
 import 'package:mob_project/utils/validators.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:mob_project/widgets/common/success_dialog.dart';
+import 'package:mob_project/services/auth_service.dart';
+import 'package:mob_project/services/google_sign_in_service.dart';
+import 'package:mob_project/services/facebook_sign_in_service.dart';
 
 class loginScreen extends StatefulWidget {
   const loginScreen({super.key});
@@ -14,11 +18,199 @@ class loginScreen extends StatefulWidget {
 
 class _loginScreenState extends State<loginScreen> {
   bool _isPasswordVisible = false;
+  bool _isLoading = false;
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   String? _emailError;
   String? _passwordError;
+
+  final AuthService _authService = AuthService();
+  final GoogleSignInService _googleSignInService = GoogleSignInService();
+  final FacebookSignInService _facebookSignInService = FacebookSignInService();
+
+  Future<void> _loginWithEmailPassword() async {
+    // Validate all fields first
+    setState(() {
+      _emailError = Validators.validateEmail(_emailController.text);
+      _passwordError = Validators.validatePassword(_passwordController.text);
+    });
+
+    // Check if validation passed
+    if (_emailError != null || _passwordError != null) {
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      // Sign in with email and password using AuthService
+      await _authService.signInWithEmailPassword(
+        email: _emailController.text.trim(),
+        password: _passwordController.text,
+      );
+
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+
+        // Show success dialog
+        await SuccessDialog.show(
+          context,
+          title: 'Welcome Back!',
+          message: 'You have successfully logged in.',
+          onOkPressed: () {
+            // Navigate to main screen
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const mainScreen()),
+            );
+          },
+        );
+      }
+    } on FirebaseAuthException catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(AuthService.getErrorMessage(e)),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: ${e.toString()}'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _signInWithGoogle() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final UserCredential? credential = await _googleSignInService
+          .signInWithGoogle();
+
+      if (credential != null && mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+
+        final capturedContext = context;
+
+        showDialog(
+          context: context,
+          builder: (context) => const SuccessDialog(
+            title: 'Success',
+            message: 'Successfully signed in',
+          ),
+        ).then((_) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const mainScreen()),
+          );
+        });
+      } else {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Google Sign-In Error: ${e.toString()}'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _signInWithFacebook() async {
+    print('Facebook Sign-In button pressed');
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      print('Calling FacebookSignInService...');
+      final UserCredential? credential = await _facebookSignInService
+          .signInWithFacebook();
+      print(
+        'Facebook Sign-In result: ${credential != null ? "Success" : "Null"}',
+      );
+
+      if (credential != null && mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+
+        showDialog(
+          context: context,
+          builder: (context) => const SuccessDialog(
+            title: 'Success',
+            message: 'Successfully signed in with Facebook!',
+          ),
+        ).then((_) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const mainScreen()),
+          );
+        });
+      } else {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Facebook Sign-In Error: ${e.toString()}'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
 
   // Define colors from the design
   final Color _bgTopColor = const Color(0xFF8AE4FF); // Light blue top
@@ -77,20 +269,19 @@ class _loginScreenState extends State<loginScreen> {
                   const SizedBox(height: 40),
 
                   // --- Input Fields ---
-                  _buildLabel("USERNAME OR EMAIL"),
+                  _buildLabel("EMAIL"),
                   const SizedBox(height: 8),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       CustomTextField(
                         controller: _emailController,
-                        hintText: "Enter your Username or Email address",
+                        hintText: "Enter your Email address",
                         fillColor: _inputFillColor,
+                        keyboardType: TextInputType.emailAddress,
                         onChanged: (value) {
                           setState(() {
-                            _emailError = Validators.validateEmailOrUsername(
-                              value,
-                            );
+                            _emailError = Validators.validateEmail(value);
                           });
                         },
                       ),
@@ -171,29 +362,10 @@ class _loginScreenState extends State<loginScreen> {
                   // --- Login Button ---
                   CustomButton(
                     text: "LOGIN",
-                    onPressed: () {
-                      // Validate all fields
-                      setState(() {
-                        _emailError = Validators.validateEmailOrUsername(
-                          _emailController.text,
-                        );
-                        _passwordError = Validators.validatePassword(
-                          _passwordController.text,
-                        );
-                      });
-
-                      // Check if validation passed
-                      if (_emailError == null && _passwordError == null) {
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const mainScreen(),
-                          ),
-                        );
-                      }
-                    },
+                    onPressed: _isLoading ? () {} : _loginWithEmailPassword,
                     backgroundColor: _buttonColor,
                     height: 50,
+                    isLoading: _isLoading,
                   ),
                   const SizedBox(height: 20),
 
@@ -262,7 +434,7 @@ class _loginScreenState extends State<loginScreen> {
                       'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/120px-Google_%22G%22_logo.svg.png',
                       height: 24,
                     ),
-                    onPressed: () {},
+                    onPressed: _signInWithGoogle,
                   ),
                   const SizedBox(height: 15),
                   SocialLoginButton(
@@ -271,7 +443,7 @@ class _loginScreenState extends State<loginScreen> {
                       'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b8/2021_Facebook_icon.svg/150px-2021_Facebook_icon.svg.png',
                       height: 24,
                     ),
-                    onPressed: () {},
+                    onPressed: _signInWithFacebook,
                   ),
                   const SizedBox(height: 40),
                 ],

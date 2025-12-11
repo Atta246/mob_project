@@ -3,18 +3,6 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:mob_project/screens/auth/login_screen.dart';
 
-class StartApp extends StatelessWidget {
-  const StartApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: const StartPage(),
-    );
-  }
-}
-
 class StartPage extends StatelessWidget {
   const StartPage({super.key});
 
