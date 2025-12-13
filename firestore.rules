@@ -1,0 +1,94 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    // USERS Collection
+    match /users/{userId} {
+      // Anyone can read user profiles
+      allow read: if true;
+      // Only the user can create/update their own profile
+      allow create: if isAuthenticated() && request.auth.uid == userId;
+      allow update: if isOwner(userId);
+      allow delete: if isOwner(userId);
+    }
+    
+    // TRIPS Collection
+    match /trips/{tripId} {
+      // Anyone can read trips (public)
+      allow read: if true;
+      // Only authenticated users can create trips (admin functionality)
+      allow create: if isAuthenticated();
+      // Only authenticated users can update trips
+      allow update: if isAuthenticated();
+      // No one can delete trips (use status field instead)
+      allow delete: if false;
+    }
+    
+    // BOOKINGS Collection
+    match /bookings/{bookingId} {
+      // Users can read their own bookings
+      allow read: if isAuthenticated() && 
+                    (request.auth.uid == resource.data.userId);
+      // Users can create bookings for themselves
+      allow create: if isAuthenticated() && 
+                      request.auth.uid == request.resource.data.userId;
+      // Users can update their own bookings (cancel, etc.)
+      allow update: if isAuthenticated() && 
+                      request.auth.uid == resource.data.userId;
+      // No deletion allowed (use status field)
+      allow delete: if false;
+    }
+    
+    // PAYMENTS Collection
+    match /payments/{paymentId} {
+      // Users can read their own payments
+      allow read: if isAuthenticated() && 
+                    request.auth.uid == resource.data.userId;
+      // Users can create payments for their bookings
+      allow create: if isAuthenticated() && 
+                      request.auth.uid == request.resource.data.userId;
+      // No updates or deletes allowed (payment records are immutable)
+      allow update, delete: if false;
+    }
+    
+    // TICKETS Collection
+    match /tickets/{ticketId} {
+      // Users can read their own tickets
+      allow read: if isAuthenticated() && 
+                    request.auth.uid == resource.data.userId;
+      // System creates tickets (authenticated users)
+      allow create: if isAuthenticated() && 
+                      request.auth.uid == request.resource.data.userId;
+      // Users can update ticket status (mark as used)
+      allow update: if isAuthenticated() && 
+                      request.auth.uid == resource.data.userId;
+      // No deletion allowed
+      allow delete: if false;
+    }
+    
+    // SUPPORT_MESSAGES Collection
+    match /support_messages/{messageId} {
+      // Users can read their own messages
+      allow read: if isAuthenticated() && 
+                    request.auth.uid == resource.data.userId;
+      // Users can create support messages
+      allow create: if isAuthenticated() && 
+                      request.auth.uid == request.resource.data.userId;
+      // Users can update their own messages (before resolution)
+      allow update: if isAuthenticated() && 
+                      request.auth.uid == resource.data.userId &&
+                      resource.data.status == 'open';
+      // No deletion allowed
+      allow delete: if false;
+    }
+  }
+}

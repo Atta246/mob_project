@@ -35,5 +35,4 @@ class AppColors {
 
   // Social Media Colors
   static const Color google = Color(0xFF4285F4);
-  static const Color facebook = Color(0xFF1877F2);
 }

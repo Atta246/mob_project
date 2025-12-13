@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:mob_project/screens/trips/booking_screen.dart';
 import 'package:mob_project/widgets/widgets.dart';
+import 'package:mob_project/models/models.dart';
+import 'package:mob_project/repositories/repositories.dart';
+import 'package:mob_project/screens/trips/trip_details_screen.dart';
+import 'package:mob_project/utils/modern_snackbar.dart';
 
 class homeScreen extends StatefulWidget {
   const homeScreen({super.key});
@@ -12,8 +15,46 @@ class homeScreen extends StatefulWidget {
 class _homeScreenState extends State<homeScreen> {
   final PageController _pageController = PageController();
   int _currentCarouselIndex = 0;
-  final Color _cardBackgroundColor = const Color(0xFFF0F9FF);
-  final Color _bookBtnColor = const Color(0xFF90E0FF);
+  final TripRepository _tripRepository = TripRepository();
+  List<TripModel> _popularTrips = [];
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadPopularTrips();
+  }
+
+  Future<void> _loadPopularTrips() async {
+    try {
+      final trips = await _tripRepository.getAllTrips();
+      setState(() {
+        // Get first 2 trips as popular trips
+        _popularTrips = trips.take(2).toList();
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+      if (mounted) {
+        ModernSnackBar.show(
+          context,
+          'Failed to load trips: $e',
+          type: SnackBarType.error,
+        );
+      }
+    }
+  }
+
+  void _navigateToTripDetails(TripModel trip) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => TripDetailsPage(tripId: trip.tripId, trip: trip),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -82,47 +123,70 @@ class _homeScreenState extends State<homeScreen> {
                   ),
                   const SizedBox(height: 15),
                   // Cards
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                    child: Column(
-                      children: [
-                        HomeTripCard(
-                          imagePath: 'assets/images/ballon1.png',
-                          title: "Sunrise Trip",
-                          description:
-                              "Our most popular adventure—watch the sunrise paint the sky from a floating balloon.",
-                          tripId: 'sunrise_trip',
-                          onBookNow: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) =>
-                                    BookingPage(tripId: 'sunrise_trip'),
-                              ),
-                            );
-                          },
+                  _isLoading
+                      ? Center(
+                          child: Padding(
+                            padding: const EdgeInsets.all(40.0),
+                            child: CircularProgressIndicator(),
+                          ),
+                        )
+                      : _popularTrips.isEmpty
+                      ? Center(
+                          child: Padding(
+                            padding: const EdgeInsets.all(40.0),
+                            child: Column(
+                              children: [
+                                Icon(
+                                  Icons.flight_takeoff,
+                                  size: 48,
+                                  color: Colors.grey,
+                                ),
+                                SizedBox(height: 16),
+                                Text(
+                                  'No trips available yet',
+                                  style: TextStyle(
+                                    color: Colors.grey[600],
+                                    fontSize: 16,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        )
+                      : Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                          child: Column(
+                            children: [
+                              if (_popularTrips.length > 0)
+                                HomeTripCard(
+                                  imagePath:
+                                      _popularTrips[0].imageUrl.isNotEmpty
+                                      ? _popularTrips[0].imageUrl
+                                      : 'assets/images/ballon1.png',
+                                  title: _popularTrips[0].title,
+                                  description: _popularTrips[0].description,
+                                  tripId: _popularTrips[0].tripId,
+                                  onBookNow: () =>
+                                      _navigateToTripDetails(_popularTrips[0]),
+                                ),
+                              if (_popularTrips.length > 1) ...[
+                                const SizedBox(height: 20),
+                                HomeTripCard(
+                                  imagePath:
+                                      _popularTrips[1].imageUrl.isNotEmpty
+                                      ? _popularTrips[1].imageUrl
+                                      : 'assets/images/ballon2.png',
+                                  title: _popularTrips[1].title,
+                                  description: _popularTrips[1].description,
+                                  tripId: _popularTrips[1].tripId,
+                                  onBookNow: () =>
+                                      _navigateToTripDetails(_popularTrips[1]),
+                                ),
+                              ],
+                              const SizedBox(height: 30),
+                            ],
+                          ),
                         ),
-                        const SizedBox(height: 20),
-                        HomeTripCard(
-                          imagePath: 'assets/images/ballon2.png',
-                          title: "After Sunrise Trip",
-                          description:
-                              "Golden skies, quiet winds, and a perfect sunrise—our most unforgettable trip.",
-                          tripId: 'after_sunrise_trip',
-                          onBookNow: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) =>
-                                    BookingPage(tripId: 'after_sunrise_trip'),
-                              ),
-                            );
-                          },
-                        ),
-                        const SizedBox(height: 30),
-                      ],
-                    ),
-                  ),
                 ],
               ),
             ),

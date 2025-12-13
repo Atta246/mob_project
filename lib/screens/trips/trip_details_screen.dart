@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:mob_project/screens/trips/booking_screen.dart';
-import 'package:mob_project/screens/home/main_screen.dart';
-import 'package:mob_project/widgets/custom_bottom_nav.dart';
+import 'package:mob_project/models/models.dart';
+import 'package:mob_project/repositories/repositories.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:mob_project/utils/modern_snackbar.dart';
 
 class TripDetailsPage extends StatefulWidget {
   final String tripId;
+  final TripModel? trip;
 
-  const TripDetailsPage({super.key, required this.tripId});
+  const TripDetailsPage({super.key, required this.tripId, this.trip});
 
   @override
   State<TripDetailsPage> createState() => _TripDetailsPageState();
@@ -16,66 +20,41 @@ class _TripDetailsPageState extends State<TripDetailsPage>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   bool _isFavorite = false;
+  final TripRepository _tripRepository = TripRepository();
+  final ReviewRepository _reviewRepository = ReviewRepository();
 
-  // Mock data - in real app, this would be fetched based on tripId
-  final Map<String, dynamic> _tripData = {
-    'id': '1',
-    'title': 'Majestic Dawn Adventure',
-    'location': 'Luxor, Egypt',
-    'price': 199.0,
-    'rating': 4.8,
-    'reviewCount': 124,
-    'duration': '1 hour',
-    'maxAltitude': '3000 feet',
-    'groupSize': '8-12 people',
-    'images': ['assets/images/ballon.png'],
-    'description':
-        'Experience the magical sunrise over Cappadocia\'s fairy chimneys in this unforgettable hot air balloon adventure. Float gently above the otherworldly landscape as the first light of day illuminates the ancient volcanic formations.',
-    'highlights': [
-      'Sunrise hot air balloon flight',
-      'Professional pilot and crew',
-      'Champagne celebration upon landing',
-      'Flight certificate',
-      'Hotel pickup and drop-off',
-      'Light breakfast before flight',
-    ],
-    'itinerary': [
-      {'time': '04:30', 'activity': 'Hotel pickup'},
-      {'time': '05:00', 'activity': 'Light breakfast at launch site'},
-      {'time': '05:30', 'activity': 'Safety briefing and balloon preparation'},
-      {'time': '06:00', 'activity': 'Takeoff - Begin your aerial adventure'},
-      {'time': '07:00', 'activity': 'Landing and champagne celebration'},
-      {'time': '08:00', 'activity': 'Return to hotel'},
-    ],
-    'userReviews': [
-      {
-        'name': 'Sarah Johnson',
-        'rating': 5.0,
-        'date': '2 weeks ago',
-        'comment':
-            'Absolutely magical experience! The sunrise views were breathtaking and the pilot was very professional.',
-      },
-      {
-        'name': 'Mike Chen',
-        'rating': 4.8,
-        'date': '1 month ago',
-        'comment':
-            'Amazing adventure, would definitely recommend. The champagne celebration was a nice touch!',
-      },
-      {
-        'name': 'Emma Wilson',
-        'rating': 4.9,
-        'date': '6 weeks ago',
-        'comment':
-            'Once in a lifetime experience. The views of Cappadocia from above are incredible.',
-      },
-    ],
-  };
+  TripModel? _trip;
+  bool _isLoading = false;
+  String? _errorMessage;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
+    _trip = widget.trip;
+    if (_trip == null) {
+      _loadTrip();
+    }
+  }
+
+  Future<void> _loadTrip() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final trip = await _tripRepository.getTripById(widget.tripId);
+      setState(() {
+        _trip = trip;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _errorMessage = 'Failed to load trip: $e';
+        _isLoading = false;
+      });
+    }
   }
 
   @override
@@ -84,14 +63,271 @@ class _TripDetailsPageState extends State<TripDetailsPage>
     super.dispose();
   }
 
-  Widget _buildImageGallery() {
-    return SizedBox(
-      height: 300,
-      child: PageView.builder(
-        itemCount: _tripData['images'].length,
-        itemBuilder: (context, index) {
-          return Image.asset(_tripData['images'][index], fit: BoxFit.cover);
-        },
+  @override
+  Widget build(BuildContext context) {
+    if (_isLoading) {
+      return Scaffold(
+        appBar: AppBar(title: Text('Trip Details')),
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    if (_errorMessage != null) {
+      return Scaffold(
+        appBar: AppBar(title: Text('Trip Details')),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.error_outline, size: 60, color: Colors.red),
+              SizedBox(height: 16),
+              Text(_errorMessage!),
+              SizedBox(height: 16),
+              ElevatedButton(onPressed: _loadTrip, child: Text('Retry')),
+            ],
+          ),
+        ),
+      );
+    }
+
+    if (_trip == null) {
+      return Scaffold(
+        appBar: AppBar(title: Text('Trip Details')),
+        body: Center(child: Text('Trip not found')),
+      );
+    }
+
+    return Scaffold(
+      body: Stack(
+        children: [
+          CustomScrollView(
+            slivers: [
+              SliverAppBar(
+                expandedHeight: 300,
+                pinned: true,
+                flexibleSpace: FlexibleSpaceBar(
+                  background: _trip!.imageUrl.isNotEmpty
+                      ? Image.network(
+                          _trip!.imageUrl,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Image.asset(
+                              'assets/images/ballon.png',
+                              fit: BoxFit.cover,
+                            );
+                          },
+                        )
+                      : Image.asset(
+                          'assets/images/ballon.png',
+                          fit: BoxFit.cover,
+                        ),
+                ),
+                actions: [
+                  IconButton(
+                    icon: Icon(
+                      _isFavorite ? Icons.favorite : Icons.favorite_border,
+                      color: Colors.red,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _isFavorite = !_isFavorite;
+                      });
+                    },
+                  ),
+                ],
+              ),
+              SliverToBoxAdapter(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  _trip!.title,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .headlineSmall
+                                      ?.copyWith(fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                              Chip(
+                                label: Text(
+                                  '${_trip!.availableSeats} seats left',
+                                ),
+                                backgroundColor: Colors.blue.shade50,
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.location_on,
+                                size: 20,
+                                color: Colors.grey,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                _trip!.destination,
+                                style: TextStyle(color: Colors.grey[600]),
+                              ),
+                            ],
+                          ),
+                          if (_trip!.rating > 0) ...[
+                            const SizedBox(height: 8),
+                            Row(
+                              children: [
+                                Icon(Icons.star, color: Colors.amber, size: 20),
+                                const SizedBox(width: 4),
+                                Text(
+                                  '${_trip!.rating.toStringAsFixed(1)} (${_trip!.reviewCount} reviews)',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.grey[700],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                          const SizedBox(height: 16),
+                          Row(
+                            children: [
+                              _buildInfoChip(
+                                Icons.calendar_today,
+                                '${_trip!.departureDate.month}/${_trip!.departureDate.day}/${_trip!.departureDate.year}',
+                              ),
+                              const SizedBox(width: 12),
+                              _buildInfoChip(
+                                Icons.access_time,
+                                '${_trip!.departureDate.hour}:${_trip!.departureDate.minute.toString().padLeft(2, '0')}',
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                '\$${_trip!.price.toStringAsFixed(0)}',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .headlineMedium
+                                    ?.copyWith(
+                                      color: Colors.blue,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                              ),
+                              Text(
+                                'per person',
+                                style: TextStyle(color: Colors.grey[600]),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    TabBar(
+                      controller: _tabController,
+                      labelColor: Colors.blue,
+                      unselectedLabelColor: Colors.grey,
+                      indicatorColor: Colors.blue,
+                      tabs: const [
+                        Tab(text: 'Overview'),
+                        Tab(text: 'Itinerary'),
+                        Tab(text: 'Reviews'),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              SliverFillRemaining(
+                child: TabBarView(
+                  controller: _tabController,
+                  children: [
+                    _buildOverviewTab(),
+                    _buildItineraryTab(),
+                    _buildReviewsTab(),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 10,
+                    offset: Offset(0, -5),
+                  ),
+                ],
+              ),
+              child: ElevatedButton(
+                onPressed: _trip!.availableSeats > 0
+                    ? () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => BookingScreen(
+                              tripId: widget.tripId,
+                              trip: _trip!,
+                            ),
+                          ),
+                        );
+                      }
+                    : null,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: Text(
+                  _trip!.availableSeats > 0
+                      ? 'Book Now - \$${_trip!.price.toStringAsFixed(0)}'
+                      : 'Sold Out',
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInfoChip(IconData icon, String text) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.grey.shade100,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 16, color: Colors.grey[700]),
+          const SizedBox(width: 4),
+          Text(text),
+        ],
       ),
     );
   }
@@ -110,34 +346,8 @@ class _TripDetailsPageState extends State<TripDetailsPage>
           ),
           const SizedBox(height: 8),
           Text(
-            _tripData['description'],
+            _trip!.description,
             style: Theme.of(context).textTheme.bodyMedium,
-          ),
-          const SizedBox(height: 24),
-          Text(
-            'Trip Highlights',
-            style: Theme.of(
-              context,
-            ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 12),
-          ...(_tripData['highlights'] as List<String>).map(
-            (highlight) => Padding(
-              padding: const EdgeInsets.only(bottom: 8),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Icon(Icons.check_circle, color: Colors.green, size: 20),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      highlight,
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
-                  ),
-                ],
-              ),
-            ),
           ),
           const SizedBox(height: 24),
           Text(
@@ -147,10 +357,53 @@ class _TripDetailsPageState extends State<TripDetailsPage>
             ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 12),
-          _buildDetailRow('Duration', _tripData['duration']),
-          _buildDetailRow('Max Altitude', _tripData['maxAltitude']),
-          _buildDetailRow('Group Size', _tripData['groupSize']),
-          _buildDetailRow('Location', _tripData['location']),
+          _buildDetailRow('Destination', _trip!.destination),
+          _buildDetailRow(
+            'Departure',
+            '${_trip!.departureDate.month}/${_trip!.departureDate.day}/${_trip!.departureDate.year}',
+          ),
+          _buildDetailRow(
+            'Return',
+            '${_trip!.returnDate.month}/${_trip!.returnDate.day}/${_trip!.returnDate.year}',
+          ),
+          _buildDetailRow(
+            'Duration',
+            '${(_trip!.duration / 60).toStringAsFixed(0)} hour',
+          ),
+          if (_trip!.maxAltitude.isNotEmpty)
+            _buildDetailRow('Max Altitude', _trip!.maxAltitude),
+          if (_trip!.groupSize.isNotEmpty)
+            _buildDetailRow('Group Size', _trip!.groupSize),
+          _buildDetailRow('Available Seats', '${_trip!.availableSeats}'),
+          const SizedBox(height: 24),
+          if (_trip!.highlights.isNotEmpty) ...[
+            Text(
+              'Highlights',
+              style: Theme.of(
+                context,
+              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 12),
+            ..._trip!.highlights.map(
+              (highlight) => Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(Icons.check_circle, color: Colors.green, size: 20),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        highlight,
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+          const SizedBox(height: 80),
         ],
       ),
     );
@@ -163,7 +416,7 @@ class _TripDetailsPageState extends State<TripDetailsPage>
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
-            width: 100,
+            width: 120,
             child: Text(
               label,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -181,298 +434,354 @@ class _TripDetailsPageState extends State<TripDetailsPage>
     );
   }
 
-  Widget _buildReviewsTab() {
+  Widget _buildItineraryTab() {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Text(
-                'Reviews',
-                style: Theme.of(
-                  context,
-                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-              ),
-              const Spacer(),
-              Row(
-                children: [
-                  Icon(Icons.star, color: Colors.amber[600], size: 20),
-                  const SizedBox(width: 4),
-                  Text(
-                    _tripData['rating'].toString(),
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    '(${_tripData['userReviews'].length} reviews)',
-                    style: Theme.of(
-                      context,
-                    ).textTheme.bodySmall?.copyWith(color: Colors.grey[600]),
-                  ),
-                ],
-              ),
-            ],
+          Text(
+            'Trip Timeline',
+            style: Theme.of(
+              context,
+            ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 16),
-          ...(_tripData['userReviews'] as List<Map<String, dynamic>>).map(
-            (review) => Container(
-              margin: const EdgeInsets.only(bottom: 16),
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey.shade300),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      CircleAvatar(
-                        backgroundColor: Colors.lightBlue,
-                        child: Text(
-                          review['name'][0],
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              review['name'],
-                              style: Theme.of(context).textTheme.titleMedium
-                                  ?.copyWith(fontWeight: FontWeight.bold),
-                            ),
-                            Row(
-                              children: [
-                                ...List.generate(
-                                  5,
-                                  (index) => Icon(
-                                    index < review['rating']
-                                        ? Icons.star
-                                        : Icons.star_border,
-                                    color: Colors.amber[600],
-                                    size: 16,
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  review['date'],
-                                  style: Theme.of(context).textTheme.bodySmall
-                                      ?.copyWith(color: Colors.grey[600]),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    review['comment'],
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ),
-                ],
-              ),
+          _buildTimelineItem('Departure', _trip!.departureDate),
+          _buildTimelineItem('Return', _trip!.returnDate),
+          const SizedBox(height: 80),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTimelineItem(String label, DateTime date) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: Row(
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: Colors.blue.shade50,
+              shape: BoxShape.circle,
             ),
+            child: Icon(
+              label == 'Departure' ? Icons.flight_takeoff : Icons.flight_land,
+              color: Colors.blue,
+            ),
+          ),
+          const SizedBox(width: 16),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+              ),
+              Text(
+                '${date.month}/${date.day}/${date.year} at ${date.hour}:${date.minute.toString().padLeft(2, '0')}',
+                style: TextStyle(color: Colors.grey[600]),
+              ),
+            ],
           ),
         ],
       ),
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: CustomScrollView(
-        slivers: [
-          SliverAppBar(
-            expandedHeight: 300,
-            pinned: true,
-            leading: IconButton(
-              icon: const Icon(Icons.arrow_back, color: Colors.white),
-              onPressed: () => Navigator.pop(context),
-            ),
-            actions: [
-              IconButton(
-                icon: Icon(
-                  _isFavorite ? Icons.favorite : Icons.favorite_border,
-                  color: Colors.white,
+  Widget _buildReviewsTab() {
+    return StreamBuilder<List<ReviewModel>>(
+      stream: _reviewRepository.streamReviewsByTripId(widget.tripId),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(child: CircularProgressIndicator());
+        }
+
+        final reviews = snapshot.data ?? [];
+
+        return SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Customer Reviews',
+                style: Theme.of(
+                  context,
+                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 16),
+
+              // Add Review Button
+              ElevatedButton.icon(
+                onPressed: () => _showAddReviewDialog(context),
+                icon: Icon(Icons.rate_review),
+                label: Text('Write a Review'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue,
+                  foregroundColor: Colors.white,
+                  padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
-                onPressed: () {
-                  setState(() {
-                    _isFavorite = !_isFavorite;
-                  });
-                },
               ),
-              IconButton(
-                icon: const Icon(Icons.share, color: Colors.white),
-                onPressed: () {
-                  // TODO: Implement share functionality
-                },
-              ),
-            ],
-            flexibleSpace: FlexibleSpaceBar(
-              background: Stack(
-                fit: StackFit.expand,
-                children: [
-                  _buildImageGallery(),
-                  Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          Colors.black.withOpacity(0.3),
-                          Colors.transparent,
-                          Colors.black.withOpacity(0.7),
-                        ],
-                      ),
-                    ),
-                  ),
-                  Positioned(
-                    bottom: 16,
-                    left: 16,
-                    right: 16,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          _tripData['title'],
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 28,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Row(
-                          children: [
-                            const Icon(
-                              Icons.location_on,
-                              color: Colors.white70,
-                              size: 16,
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              _tripData['location'],
-                              style: const TextStyle(
-                                color: Colors.white70,
-                                fontSize: 16,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          SliverToBoxAdapter(
-            child: Container(
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+              const SizedBox(height: 24),
+
+              // Reviews List
+              if (reviews.isEmpty)
+                Center(
+                  child: Column(
                     children: [
-                      Text(
-                        '\$${_tripData['price']}',
-                        style: Theme.of(context).textTheme.displaySmall
-                            ?.copyWith(
-                              color: Colors.lightBlue,
-                              fontWeight: FontWeight.bold,
-                            ),
+                      Icon(
+                        Icons.rate_review_outlined,
+                        size: 60,
+                        color: Colors.grey,
                       ),
-                      const SizedBox(height: 4),
-                      Row(
-                        children: [
-                          Icon(Icons.star, color: Colors.amber[600], size: 20),
-                          const SizedBox(width: 4),
-                          Text(
-                            _tripData['rating'].toString(),
-                            style: Theme.of(context).textTheme.titleMedium
-                                ?.copyWith(fontWeight: FontWeight.bold),
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            '(${_tripData['reviewCount']} reviews)',
-                            style: Theme.of(context).textTheme.bodyMedium
-                                ?.copyWith(color: Colors.grey[600]),
-                          ),
-                        ],
+                      const SizedBox(height: 16),
+                      Text(
+                        'No reviews yet',
+                        style: TextStyle(color: Colors.grey[600]),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Be the first to review!',
+                        style: TextStyle(color: Colors.grey[500]),
                       ),
                     ],
                   ),
-                  const Spacer(),
-                  ElevatedButton(
-                    onPressed: () => {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => BookingPage(tripId: '1'),
+                )
+              else
+                ...reviews.map((review) => _buildReviewCard(review)),
+              const SizedBox(height: 80),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildReviewCard(ReviewModel review) {
+    final timeAgo = _getTimeAgo(review.createdAt);
+    return Card(
+      margin: EdgeInsets.only(bottom: 16),
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    CircleAvatar(
+                      backgroundColor: Colors.blue.shade100,
+                      child: Text(
+                        review.userName[0].toUpperCase(),
+                        style: TextStyle(
+                          color: Colors.blue,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 32,
-                        vertical: 16,
-                      ),
                     ),
-                    child: const Text('Book Now'),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          SliverToBoxAdapter(
-            child: TabBar(
-              controller: _tabController,
-              indicatorColor: Colors.lightBlue,
-              labelColor: Colors.lightBlue,
-              unselectedLabelColor: Colors.grey,
-              tabs: const [
-                Tab(text: 'Overview'),
-                Tab(text: 'Reviews'),
+                    SizedBox(width: 12),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          review.userName,
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
+                        Row(
+                          children: List.generate(
+                            5,
+                            (index) => Icon(
+                              index < review.rating
+                                  ? Icons.star
+                                  : Icons.star_border,
+                              color: Colors.amber,
+                              size: 16,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                Text(
+                  timeAgo,
+                  style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                ),
               ],
             ),
-          ),
-          SliverFillRemaining(
-            child: TabBarView(
-              controller: _tabController,
-              children: [_buildOverviewTab(), _buildReviewsTab()],
-            ),
-          ),
-        ],
+            SizedBox(height: 12),
+            Text(review.comment, style: TextStyle(fontSize: 14, height: 1.4)),
+          ],
+        ),
       ),
-      bottomNavigationBar: CustomBottomNav(
-        currentIndex: 1,
-        onTap: (index) {
-          if (index == 2) {
-            Navigator.popUntil(context, (route) => route.isFirst);
-          } else {
-            Navigator.pushAndRemoveUntil(
-              context,
-              MaterialPageRoute(
-                builder: (context) => mainScreen(initialIndex: index),
+    );
+  }
+
+  String _getTimeAgo(DateTime dateTime) {
+    final now = DateTime.now();
+    final difference = now.difference(dateTime);
+
+    if (difference.inDays > 365) {
+      return '${(difference.inDays / 365).floor()} year${(difference.inDays / 365).floor() > 1 ? 's' : ''} ago';
+    } else if (difference.inDays > 30) {
+      return '${(difference.inDays / 30).floor()} month${(difference.inDays / 30).floor() > 1 ? 's' : ''} ago';
+    } else if (difference.inDays > 0) {
+      return '${difference.inDays} day${difference.inDays > 1 ? 's' : ''} ago';
+    } else if (difference.inHours > 0) {
+      return '${difference.inHours} hour${difference.inHours > 1 ? 's' : ''} ago';
+    } else if (difference.inMinutes > 0) {
+      return '${difference.inMinutes} minute${difference.inMinutes > 1 ? 's' : ''} ago';
+    } else {
+      return 'Just now';
+    }
+  }
+
+  void _showAddReviewDialog(BuildContext context) async {
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (user == null) {
+      ModernSnackBar.show(
+        context,
+        'Please login to write a review',
+        type: SnackBarType.warning,
+      );
+      return;
+    }
+
+    int rating = 5;
+    final reviewController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          title: Text('Write a Review'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Your Rating'),
+              SizedBox(height: 8),
+              Row(
+                children: List.generate(
+                  5,
+                  (index) => IconButton(
+                    icon: Icon(
+                      index < rating ? Icons.star : Icons.star_border,
+                      color: Colors.amber,
+                      size: 32,
+                    ),
+                    onPressed: () => setState(() => rating = index + 1),
+                  ),
+                ),
               ),
-              (route) => false,
-            );
-          }
-        },
+              SizedBox(height: 16),
+              TextField(
+                controller: reviewController,
+                maxLines: 4,
+                decoration: InputDecoration(
+                  hintText: 'Share your experience...',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  filled: true,
+                  fillColor: Colors.grey[100],
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                if (reviewController.text.isNotEmpty) {
+                  // Close dialog first
+                  Navigator.pop(context);
+
+                  // Show loading
+                  ModernSnackBar.show(
+                    context,
+                    'Submitting review...',
+                    type: SnackBarType.info,
+                    duration: Duration(seconds: 3),
+                  );
+
+                  try {
+                    // Get user name
+                    final userDoc = await FirebaseFirestore.instance
+                        .collection('users')
+                        .doc(user.uid)
+                        .get();
+                    final userName = userDoc.data()?['fullName'] ?? 'Anonymous';
+
+                    // Create review
+                    final review = ReviewModel(
+                      reviewId: '',
+                      tripId: widget.tripId,
+                      userId: user.uid,
+                      userName: userName,
+                      rating: rating,
+                      comment: reviewController.text,
+                      createdAt: DateTime.now(),
+                    );
+
+                    await _reviewRepository.createReview(review);
+
+                    // Update trip rating
+                    await _reviewRepository.updateTripRating(widget.tripId);
+
+                    // Reload trip to get updated rating
+                    final updatedTrip = await _tripRepository.getTripById(
+                      widget.tripId,
+                    );
+
+                    if (mounted) {
+                      this.setState(() {
+                        _trip = updatedTrip;
+                      });
+
+                      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                      ModernSnackBar.show(
+                        context,
+                        'Thank you for your review!',
+                        type: SnackBarType.success,
+                      );
+                    }
+                  } catch (e) {
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                      ModernSnackBar.show(
+                        context,
+                        'Failed to submit review: $e',
+                        type: SnackBarType.error,
+                      );
+                    }
+                  }
+                }
+              },
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
+              child: Text('Submit'),
+            ),
+          ],
+        ),
       ),
     );
   }

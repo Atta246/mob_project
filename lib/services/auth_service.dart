@@ -1,7 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -58,7 +57,7 @@ class AuthService {
     }
   }
 
-  // Sign out from all providers (Email, Google, Facebook, etc.)
+  // Sign out from all providers (Email, Google, etc.)
   Future<void> signOut() async {
     try {
       // Get the current user's sign-in provider
@@ -73,10 +72,6 @@ class AuthService {
           if (provider.providerId == 'google.com') {
             await _googleSignIn.signOut();
           }
-          // Sign out from Facebook if user signed in with Facebook
-          if (provider.providerId == 'facebook.com') {
-            await FacebookAuth.instance.logOut();
-          }
         }
       }
 
@@ -87,7 +82,7 @@ class AuthService {
     }
   }
 
-  // Get user's sign-in provider (email, google, facebook, etc.)
+  // Get user's sign-in provider (email, google, etc.)
   String? getUserSignInProvider() {
     final user = _auth.currentUser;
     if (user != null && user.providerData.isNotEmpty) {

@@ -1,0 +1,49 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // ⚠️ TESTING RULES - OPEN ACCESS FOR DEVELOPMENT
+    // ⚠️ Replace with secure rules before production
+    
+    // TRIPS - Public read access (anyone can view trips)
+    match /trips/{tripId} {
+      allow read: if true;  // Anyone can read
+      allow write: if true; // Anyone can write (FOR TESTING ONLY)
+    }
+    
+    // USERS - Public access for testing
+    match /users/{userId} {
+      allow read: if true;  // Anyone can read
+      allow write: if true; // Anyone can write (FOR TESTING ONLY)
+    }
+    
+    // BOOKINGS - Public access for testing
+    match /bookings/{bookingId} {
+      allow read: if true;  // Anyone can read
+      allow write: if true; // Anyone can write (FOR TESTING ONLY)
+    }
+    
+    // PAYMENTS - Public access for testing
+    match /payments/{paymentId} {
+      allow read: if true;  // Anyone can read
+      allow write: if true; // Anyone can write (FOR TESTING ONLY)
+    }
+    
+    // TICKETS - Public access for testing
+    match /tickets/{ticketId} {
+      allow read: if true;  // Anyone can read
+      allow write: if true; // Anyone can write (FOR TESTING ONLY)
+    }
+    
+    // SUPPORT MESSAGES - Public access for testing
+    match /support_messages/{messageId} {
+      allow read: if true;  // Anyone can read
+      allow write: if true; // Anyone can write (FOR TESTING ONLY)
+    }
+    
+    // Catch-all for any other collections
+    match /{document=**} {
+      allow read, write: if true; // FOR TESTING ONLY
+    }
+  }
+}

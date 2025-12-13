@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:mob_project/screens/home/main_screen.dart';
 import 'package:mob_project/screens/auth/signup_screen.dart';
+import 'package:mob_project/screens/auth/complete_profile_screen.dart';
 import 'package:mob_project/widgets/widgets.dart';
 import 'package:mob_project/utils/validators.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:mob_project/widgets/common/success_dialog.dart';
 import 'package:mob_project/services/auth_service.dart';
 import 'package:mob_project/services/google_sign_in_service.dart';
-import 'package:mob_project/services/facebook_sign_in_service.dart';
+import 'package:mob_project/services/profile_service.dart';
+import 'package:mob_project/utils/modern_snackbar.dart';
 
 class loginScreen extends StatefulWidget {
   const loginScreen({super.key});
@@ -27,7 +29,7 @@ class _loginScreenState extends State<loginScreen> {
 
   final AuthService _authService = AuthService();
   final GoogleSignInService _googleSignInService = GoogleSignInService();
-  final FacebookSignInService _facebookSignInService = FacebookSignInService();
+  final ProfileService _profileService = ProfileService();
 
   Future<void> _loginWithEmailPassword() async {
     // Validate all fields first
@@ -57,6 +59,19 @@ class _loginScreenState extends State<loginScreen> {
           _isLoading = false;
         });
 
+        // Check if profile is complete
+        final isComplete = await _profileService.isProfileComplete();
+        if (!isComplete) {
+          // Profile is incomplete, navigate to complete profile screen
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const CompleteProfileScreen(),
+            ),
+          );
+          return;
+        }
+
         // Show success dialog
         await SuccessDialog.show(
           context,
@@ -77,12 +92,11 @@ class _loginScreenState extends State<loginScreen> {
       });
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(AuthService.getErrorMessage(e)),
-            backgroundColor: Colors.red,
-            duration: const Duration(seconds: 3),
-          ),
+        ModernSnackBar.show(
+          context,
+          AuthService.getErrorMessage(e),
+          type: SnackBarType.error,
+          duration: const Duration(seconds: 3),
         );
       }
     } catch (e) {
@@ -91,12 +105,11 @@ class _loginScreenState extends State<loginScreen> {
       });
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error: ${e.toString()}'),
-            backgroundColor: Colors.red,
-            duration: const Duration(seconds: 3),
-          ),
+        ModernSnackBar.show(
+          context,
+          'Error: ${e.toString()}',
+          type: SnackBarType.error,
+          duration: const Duration(seconds: 3),
         );
       }
     }
@@ -116,7 +129,18 @@ class _loginScreenState extends State<loginScreen> {
           _isLoading = false;
         });
 
-        final capturedContext = context;
+        // Check if profile is complete
+        final isComplete = await _profileService.isProfileComplete();
+        if (!isComplete) {
+          // Profile is incomplete, navigate to complete profile screen
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const CompleteProfileScreen(),
+            ),
+          );
+          return;
+        }
 
         showDialog(
           context: context,
@@ -141,65 +165,11 @@ class _loginScreenState extends State<loginScreen> {
       });
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Google Sign-In Error: ${e.toString()}'),
-            backgroundColor: Colors.red,
-            duration: const Duration(seconds: 3),
-          ),
-        );
-      }
-    }
-  }
-
-  Future<void> _signInWithFacebook() async {
-    print('Facebook Sign-In button pressed');
-    setState(() {
-      _isLoading = true;
-    });
-
-    try {
-      print('Calling FacebookSignInService...');
-      final UserCredential? credential = await _facebookSignInService
-          .signInWithFacebook();
-      print(
-        'Facebook Sign-In result: ${credential != null ? "Success" : "Null"}',
-      );
-
-      if (credential != null && mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-
-        showDialog(
-          context: context,
-          builder: (context) => const SuccessDialog(
-            title: 'Success',
-            message: 'Successfully signed in with Facebook!',
-          ),
-        ).then((_) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => const mainScreen()),
-          );
-        });
-      } else {
-        setState(() {
-          _isLoading = false;
-        });
-      }
-    } catch (e) {
-      setState(() {
-        _isLoading = false;
-      });
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Facebook Sign-In Error: ${e.toString()}'),
-            backgroundColor: Colors.red,
-            duration: const Duration(seconds: 3),
-          ),
+        ModernSnackBar.show(
+          context,
+          'Google Sign-In Error: ${e.toString()}',
+          type: SnackBarType.error,
+          duration: const Duration(seconds: 3),
         );
       }
     }
@@ -217,7 +187,6 @@ class _loginScreenState extends State<loginScreen> {
   final Color _bgBottomColor = const Color(0xFFEBEBEB); // Greyish bottom
   final Color _inputFillColor = const Color(0xFFCFEFF8); // Pale blue input bg
   final Color _buttonColor = const Color(0xFF81D4FA); // Login button color
-  final Color _textColor = const Color(0xFF37474F); // Dark grey text
 
   @override
   Widget build(BuildContext context) {
@@ -435,15 +404,6 @@ class _loginScreenState extends State<loginScreen> {
                       height: 24,
                     ),
                     onPressed: _signInWithGoogle,
-                  ),
-                  const SizedBox(height: 15),
-                  SocialLoginButton(
-                    text: "Continue with Facebook",
-                    icon: Image.network(
-                      'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b8/2021_Facebook_icon.svg/150px-2021_Facebook_icon.svg.png',
-                      height: 24,
-                    ),
-                    onPressed: _signInWithFacebook,
                   ),
                   const SizedBox(height: 40),
                 ],

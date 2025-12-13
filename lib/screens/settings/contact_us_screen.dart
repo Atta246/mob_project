@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:mob_project/utils/validators.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:mob_project/models/models.dart';
+import 'package:mob_project/repositories/repositories.dart';
+import 'package:mob_project/utils/modern_snackbar.dart';
 
 class ContactUsScreen extends StatefulWidget {
   const ContactUsScreen({super.key});
@@ -11,6 +15,8 @@ class ContactUsScreen extends StatefulWidget {
 class _ContactUsScreenState extends State<ContactUsScreen> {
   final TextEditingController _messageController = TextEditingController();
   String? _messageError;
+  final SupportRepository _supportRepository = SupportRepository();
+  bool _isSending = false;
 
   @override
   Widget build(BuildContext context) {
@@ -85,30 +91,88 @@ class _ContactUsScreenState extends State<ContactUsScreen> {
                       color: Colors.lightBlue,
                       shape: BoxShape.circle,
                     ),
-                    child: IconButton(
-                      icon: Icon(Icons.send, color: Colors.white, size: 20),
-                      onPressed: () {
-                        // Validate message
-                        setState(() {
-                          _messageError = Validators.validateMessage(
-                            _messageController.text,
-                          );
-                        });
-
-                        // Check if validation passed
-                        if (_messageError == null) {
-                          // Show success message
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Message sent successfully!'),
-                              backgroundColor: Colors.green,
+                    child: _isSending
+                        ? Padding(
+                            padding: EdgeInsets.all(12),
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
                             ),
-                          );
-                          // Clear message
-                          _messageController.clear();
-                        }
-                      },
-                    ),
+                          )
+                        : IconButton(
+                            icon: Icon(
+                              Icons.send,
+                              color: Colors.white,
+                              size: 20,
+                            ),
+                            onPressed: () async {
+                              // Validate message
+                              setState(() {
+                                _messageError = Validators.validateMessage(
+                                  _messageController.text,
+                                );
+                              });
+
+                              // Check if validation passed
+                              if (_messageError == null) {
+                                final currentUser =
+                                    FirebaseAuth.instance.currentUser;
+                                if (currentUser == null) {
+                                  ModernSnackBar.show(
+                                    context,
+                                    'Please login to send a message',
+                                    type: SnackBarType.warning,
+                                  );
+                                  return;
+                                }
+
+                                setState(() {
+                                  _isSending = true;
+                                });
+
+                                try {
+                                  // Create support message
+                                  final message = SupportMessageModel(
+                                    messageId: '',
+                                    userId: currentUser.uid,
+                                    name: currentUser.displayName ?? 'User',
+                                    email: currentUser.email ?? '',
+                                    subject: 'Contact Us',
+                                    message: _messageController.text.trim(),
+                                    status: 'open',
+                                    createdAt: DateTime.now(),
+                                  );
+
+                                  await _supportRepository.createSupportMessage(
+                                    message,
+                                  );
+
+                                  // Show success message
+                                  if (mounted) {
+                                    ModernSnackBar.show(
+                                      context,
+                                      'Message sent successfully!',
+                                      type: SnackBarType.success,
+                                    );
+                                    // Clear message
+                                    _messageController.clear();
+                                  }
+                                } catch (e) {
+                                  if (mounted) {
+                                    ModernSnackBar.show(
+                                      context,
+                                      'Failed to send message: $e',
+                                      type: SnackBarType.error,
+                                    );
+                                  }
+                                } finally {
+                                  setState(() {
+                                    _isSending = false;
+                                  });
+                                }
+                              }
+                            },
+                          ),
                   ),
                 ],
               ),

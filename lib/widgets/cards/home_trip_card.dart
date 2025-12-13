@@ -19,6 +19,9 @@ class HomeTripCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
+    final bool isNetworkImage =
+        imagePath.startsWith('http://') || imagePath.startsWith('https://');
+
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -34,20 +37,51 @@ class HomeTripCard extends StatelessWidget {
               bottomLeft: Radius.circular(20),
               bottomRight: Radius.circular(20),
             ),
-            child: Image.asset(
-              imagePath,
-              height: screenHeight * 0.2,
-              width: double.infinity,
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) {
-                return Container(
-                  height: screenHeight * 0.2,
-                  width: double.infinity,
-                  color: Colors.grey[300],
-                  child: const Icon(Icons.image, size: 50, color: Colors.grey),
-                );
-              },
-            ),
+            child: isNetworkImage
+                ? Image.network(
+                    imagePath,
+                    height: screenHeight * 0.2,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Image.asset(
+                        'assets/images/ballon.png',
+                        height: screenHeight * 0.2,
+                        width: double.infinity,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Container(
+                            height: screenHeight * 0.2,
+                            width: double.infinity,
+                            color: Colors.grey[300],
+                            child: const Icon(
+                              Icons.image,
+                              size: 50,
+                              color: Colors.grey,
+                            ),
+                          );
+                        },
+                      );
+                    },
+                  )
+                : Image.asset(
+                    imagePath,
+                    height: screenHeight * 0.2,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Container(
+                        height: screenHeight * 0.2,
+                        width: double.infinity,
+                        color: Colors.grey[300],
+                        child: const Icon(
+                          Icons.image,
+                          size: 50,
+                          color: Colors.grey,
+                        ),
+                      );
+                    },
+                  ),
           ),
           Padding(
             padding: const EdgeInsets.all(20.0),

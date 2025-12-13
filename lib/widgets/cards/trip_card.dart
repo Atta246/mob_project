@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:mob_project/screens/trips/ticket_screen.dart';
 import '../../constants/app_colors.dart';
 import '../../constants/app_constants.dart';
 import '../../constants/app_text_styles.dart';
+import 'package:mob_project/utils/modern_snackbar.dart';
 
 class TripCard extends StatelessWidget {
   final String image;
@@ -112,11 +112,10 @@ class TripCard extends StatelessWidget {
                     onPressed:
                         onButtonPressed ??
                         () {
-                          Navigator.push(
+                          ModernSnackBar.show(
                             context,
-                            MaterialPageRoute(
-                              builder: (context) => TicketPage(bookingId: '1'),
-                            ),
+                            'View your tickets in My Trips tab',
+                            type: SnackBarType.info,
                           );
                         },
                     child: Text(buttonText),

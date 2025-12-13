@@ -4,6 +4,7 @@ import 'package:mob_project/utils/validators.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:mob_project/widgets/common/success_dialog.dart';
 import 'package:mob_project/services/auth_service.dart';
+import 'package:mob_project/utils/modern_snackbar.dart';
 
 // ignore: camel_case_types
 class signupScreen extends StatefulWidget {
@@ -91,12 +92,11 @@ class _signupScreenState extends State<signupScreen> {
       });
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(AuthService.getErrorMessage(e)),
-            backgroundColor: Colors.red,
-            duration: const Duration(seconds: 3),
-          ),
+        ModernSnackBar.show(
+          context,
+          AuthService.getErrorMessage(e),
+          type: SnackBarType.error,
+          duration: const Duration(seconds: 3),
         );
       }
     } catch (e) {
@@ -105,12 +105,11 @@ class _signupScreenState extends State<signupScreen> {
       });
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error: ${e.toString()}'),
-            backgroundColor: Colors.red,
-            duration: const Duration(seconds: 3),
-          ),
+        ModernSnackBar.show(
+          context,
+          'Error: ${e.toString()}',
+          type: SnackBarType.error,
+          duration: const Duration(seconds: 3),
         );
       }
     }
@@ -342,14 +341,6 @@ class _signupScreenState extends State<signupScreen> {
                     text: "Sign in with Google",
                     icon: Image.network(
                       'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/120px-Google_%22G%22_logo.svg.png',
-                      height: 24,
-                    ),
-                  ),
-                  const SizedBox(height: 15),
-                  _buildSocialButton(
-                    text: "Sign in with Facebook",
-                    icon: Image.network(
-                      'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b8/2021_Facebook_icon.svg/150px-2021_Facebook_icon.svg.png',
                       height: 24,
                     ),
                   ),

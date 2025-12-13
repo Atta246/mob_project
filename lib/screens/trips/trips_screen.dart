@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'dart:math';
 import 'package:mob_project/screens/trips/trip_details_screen.dart';
 import 'package:mob_project/widgets/widgets.dart';
+import 'package:mob_project/models/models.dart';
+import 'package:mob_project/repositories/repositories.dart';
 
 class tripsScreen extends StatefulWidget {
   const tripsScreen({super.key});
@@ -14,6 +15,11 @@ class _tripsScreenState extends State<tripsScreen>
     with TickerProviderStateMixin {
   late AnimationController _animationController;
   final PageController _pageController = PageController(viewportFraction: 0.85);
+  final TripRepository _tripRepository = TripRepository();
+
+  List<TripModel> _trips = [];
+  bool _isLoading = true;
+  String? _errorMessage;
 
   @override
   void initState() {
@@ -22,6 +28,22 @@ class _tripsScreenState extends State<tripsScreen>
       duration: const Duration(seconds: 2),
       vsync: this,
     )..repeat();
+    _loadTrips();
+  }
+
+  Future<void> _loadTrips() async {
+    try {
+      final trips = await _tripRepository.getAllTrips();
+      setState(() {
+        _trips = trips;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _errorMessage = 'Failed to load trips: $e';
+        _isLoading = false;
+      });
+    }
   }
 
   @override
@@ -99,69 +121,97 @@ class _tripsScreenState extends State<tripsScreen>
                     ),
                     SizedBox(height: 40),
                     Expanded(
-                      child: PageView(
-                        controller: _pageController,
-                        physics: const BouncingScrollPhysics(),
-                        children: [
-                          EnhancedTripCard(
-                            imagePath: 'assets/images/ballon1.png',
-                            title: "🌅 Golden Sunrise Journey",
-                            subtitle: "Chase the dawn above the clouds",
-                            date: "May 24, 2024",
-                            time: "5:30 AM",
-                            price: "120",
-                            status: "Completed",
-                            color: const Color(0xFFFFB347),
-                            onShowDetails: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      TripDetailsPage(tripId: "1"),
-                                ),
-                              );
-                            },
-                          ),
-                          EnhancedTripCard(
-                            imagePath: 'assets/images/ballon2.png',
-                            title: "🌞 Bright Morning Flight",
-                            subtitle: "Soar through the morning light",
-                            date: "June 25, 2024",
-                            time: "7:00 AM",
-                            price: "150",
-                            status: "Upcoming",
-                            color: const Color(0xFF87CEEB),
-                            onShowDetails: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      TripDetailsPage(tripId: "2"),
-                                ),
-                              );
-                            },
-                          ),
-                          EnhancedTripCard(
-                            imagePath: 'assets/images/ballon.png',
-                            title: "🌄 Majestic Dawn ",
-                            subtitle: "Experience the magic of sunrise",
-                            date: "August 12, 2024",
-                            time: "6:00 AM",
-                            price: "100",
-                            status: "Upcoming",
-                            color: const Color(0xFFDDA0DD),
-                            onShowDetails: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      TripDetailsPage(tripId: "3"),
-                                ),
-                              );
-                            },
-                          ),
-                        ],
-                      ),
+                      child: _isLoading
+                          ? Center(
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                              ),
+                            )
+                          : _errorMessage != null
+                          ? Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.error_outline,
+                                    size: 60,
+                                    color: Colors.white70,
+                                  ),
+                                  SizedBox(height: 16),
+                                  Text(
+                                    _errorMessage!,
+                                    style: TextStyle(color: Colors.white70),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                  SizedBox(height: 16),
+                                  ElevatedButton(
+                                    onPressed: _loadTrips,
+                                    child: Text('Retry'),
+                                  ),
+                                ],
+                              ),
+                            )
+                          : _trips.isEmpty
+                          ? Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.flight_takeoff,
+                                    size: 60,
+                                    color: Colors.white70,
+                                  ),
+                                  SizedBox(height: 16),
+                                  Text(
+                                    'No trips available',
+                                    style: TextStyle(
+                                      color: Colors.white70,
+                                      fontSize: 18,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            )
+                          : PageView.builder(
+                              controller: _pageController,
+                              physics: const BouncingScrollPhysics(),
+                              itemCount: _trips.length,
+                              itemBuilder: (context, index) {
+                                final trip = _trips[index];
+                                final colors = [
+                                  const Color(0xFFFFB347),
+                                  const Color(0xFF87CEEB),
+                                  const Color(0xFFDDA0DD),
+                                ];
+                                return EnhancedTripCard(
+                                  imagePath: trip.imageUrl.isNotEmpty
+                                      ? trip.imageUrl
+                                      : 'assets/images/ballon.png',
+                                  title: trip.title,
+                                  subtitle: trip.description,
+                                  date:
+                                      "${trip.departureDate.month}/${trip.departureDate.day}/${trip.departureDate.year}",
+                                  time:
+                                      "${trip.departureDate.hour}:${trip.departureDate.minute.toString().padLeft(2, '0')}",
+                                  price: trip.price.toStringAsFixed(0),
+                                  status: trip.status == 'active'
+                                      ? 'Upcoming'
+                                      : 'Cancelled',
+                                  color: colors[index % colors.length],
+                                  onShowDetails: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => TripDetailsPage(
+                                          tripId: trip.tripId,
+                                          trip: trip,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                );
+                              },
+                            ),
                     ),
                   ],
                 ),
@@ -175,107 +225,6 @@ class _tripsScreenState extends State<tripsScreen>
       ),
 
       // Enhanced bottom navigation
-    );
-  }
-
-  Widget _buildAnimatedBalloon(int index) {
-    final positions = [
-      const Offset(50, 30),
-      const Offset(300, 20),
-      const Offset(200, 60),
-      const Offset(80, 80),
-      const Offset(250, 100),
-      const Offset(150, 40),
-      const Offset(320, 70),
-      const Offset(30, 120),
-    ];
-
-    final colors = [
-      Colors.orange.withOpacity(0.7),
-      Colors.purple.withOpacity(0.7),
-      Colors.green.withOpacity(0.7),
-      Colors.red.withOpacity(0.7),
-      Colors.blue.withOpacity(0.7),
-      Colors.pink.withOpacity(0.7),
-      Colors.yellow.withOpacity(0.7),
-      Colors.indigo.withOpacity(0.7),
-    ];
-
-    final sizes = [25.0, 35.0, 20.0, 30.0, 28.0, 22.0, 33.0, 26.0];
-
-    return AnimatedBuilder(
-      animation: _animationController,
-      builder: (context, child) {
-        return Positioned(
-          left:
-              positions[index].dx +
-              (5 * sin(_animationController.value * 2 * 3.14159 + index)),
-          top:
-              positions[index].dy +
-              (3 * cos(_animationController.value * 2 * 3.14159 + index)),
-          child: Container(
-            width: sizes[index],
-            height: sizes[index] * 1.2,
-            child: Column(
-              children: [
-                Container(
-                  width: sizes[index],
-                  height: sizes[index],
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: RadialGradient(
-                      colors: [colors[index], colors[index].withOpacity(0.4)],
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: colors[index].withOpacity(0.3),
-                        blurRadius: 6,
-                        offset: const Offset(0, 3),
-                      ),
-                    ],
-                  ),
-                ),
-                Container(
-                  width: 1.5,
-                  height: sizes[index] * 0.15,
-                  color: Colors.brown.withOpacity(0.6),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildNavItem(IconData icon, String label, bool isActive) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: isActive
-                ? Colors.white.withOpacity(0.2)
-                : Colors.transparent,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Icon(
-            icon,
-            color: isActive ? Colors.white : Colors.white.withOpacity(0.7),
-            size: 26,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          label,
-          style: TextStyle(
-            color: isActive ? Colors.white : Colors.white.withOpacity(0.7),
-            fontSize: 11,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      ],
     );
   }
 }

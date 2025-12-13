@@ -1,15 +1,61 @@
 import 'package:flutter/material.dart';
 import 'package:mob_project/screens/settings/support_screen.dart';
 import 'package:mob_project/screens/trips/mytrips_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:mob_project/models/models.dart';
+import 'package:mob_project/repositories/repositories.dart';
 import 'settings_screen.dart';
 
-class Setting_page extends StatelessWidget {
+class Setting_page extends StatefulWidget {
   const Setting_page({super.key});
+
+  @override
+  State<Setting_page> createState() => _Setting_pageState();
+}
+
+class _Setting_pageState extends State<Setting_page> {
+  final UserRepository _userRepository = UserRepository();
+  UserModel? _user;
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+  }
+
+  Future<void> _loadUserData() async {
+    final currentUser = FirebaseAuth.instance.currentUser;
+    if (currentUser != null) {
+      try {
+        final user = await _userRepository.getUserById(currentUser.uid);
+        setState(() {
+          _user = user;
+          _isLoading = false;
+        });
+      } catch (e) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    } else {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
     final screenwidth = MediaQuery.of(context).size.width;
+    final currentUser = FirebaseAuth.instance.currentUser;
+    final displayName = _user?.fullName ?? currentUser?.displayName ?? 'User';
+    final email = _user?.email ?? currentUser?.email ?? 'No email';
+
+    if (_isLoading) {
+      return Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
 
     return Scaffold(
       body: SingleChildScrollView(
@@ -34,7 +80,7 @@ class Setting_page extends StatelessWidget {
                     child: Align(
                       alignment: Alignment.topLeft,
                       child: Text(
-                        'Hi, Ahmed',
+                        'Hi, $displayName',
                         style: TextStyle(
                           fontSize: 23,
                           fontWeight: FontWeight.bold,
@@ -81,11 +127,17 @@ class Setting_page extends StatelessWidget {
                                 children: [
                                   CircleAvatar(
                                     radius: 56,
-                                    child: Icon(Icons.person, size: 70),
+                                    backgroundImage:
+                                        _user?.profileImageUrl != null
+                                        ? NetworkImage(_user!.profileImageUrl!)
+                                        : null,
+                                    child: _user?.profileImageUrl == null
+                                        ? Icon(Icons.person, size: 70)
+                                        : null,
                                   ),
                                   SizedBox(height: 14),
                                   Text(
-                                    'Ahmed',
+                                    displayName,
                                     style: TextStyle(
                                       fontSize: 20,
                                       fontWeight: FontWeight.bold,
@@ -112,7 +164,7 @@ class Setting_page extends StatelessWidget {
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Text(
-                                'Ahmed@gmail.com',
+                                email,
                                 style: TextStyle(fontSize: 14),
                               ),
                             ),
@@ -135,7 +187,7 @@ class Setting_page extends StatelessWidget {
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Text(
-                                '0000000000',
+                                _user?.phoneNumber ?? 'Not provided',
                                 style: TextStyle(fontSize: 14),
                               ),
                             ),
@@ -154,13 +206,15 @@ class Setting_page extends StatelessWidget {
                             );
                           }),
                           SizedBox(height: 12),
-                          _buildMenuItem(Icons.settings, 'Settings', () {
-                            Navigator.push(
+                          _buildMenuItem(Icons.settings, 'Settings', () async {
+                            await Navigator.push(
                               context,
                               MaterialPageRoute(
                                 builder: (context) => SettingsDetailScreen(),
                               ),
                             );
+                            // Refresh profile data after returning from settings
+                            _loadUserData();
                           }),
                           SizedBox(height: 12),
                           _buildMenuItem(Icons.support_agent, 'Support', () {
