@@ -411,24 +411,18 @@ class SettingsDetailScreen extends StatelessWidget {
         } catch (_) {}
       }
 
+      // Small delay to ensure dialog is closed
+      await Future.delayed(Duration(milliseconds: 200));
+
       if (context.mounted) {
+        // Sign out to clear all cache and sessions
+        await _authService.signOut();
+
         // Navigate directly to login and clear all routes
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(builder: (context) => const loginScreen()),
           (route) => false,
         );
-
-        // Show success message after navigation
-        Future.delayed(Duration(milliseconds: 300), () {
-          if (context.mounted) {
-            ModernSnackBar.show(
-              context,
-              'Account deleted successfully',
-              type: SnackBarType.success,
-              duration: Duration(seconds: 3),
-            );
-          }
-        });
       }
     } on FirebaseAuthException catch (e) {
       // Close loading dialog using its own context
@@ -437,6 +431,9 @@ class SettingsDetailScreen extends StatelessWidget {
           Navigator.of(loadingContext!).pop();
         } catch (_) {}
       }
+
+      // Small delay to ensure loading dialog is closed
+      await Future.delayed(Duration(milliseconds: 200));
 
       if (context.mounted) {
         // Show specific error message
