@@ -156,9 +156,9 @@ class SettingsDetailScreen extends StatelessWidget {
 
     return showDialog(
       context: context,
-      builder: (BuildContext context) {
+      builder: (BuildContext dialogContext) {
         return StatefulBuilder(
-          builder: (context, setState) {
+          builder: (stfContext, setState) {
             return AlertDialog(
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16),
@@ -278,7 +278,7 @@ class SettingsDetailScreen extends StatelessWidget {
               ),
               actions: [
                 TextButton(
-                  onPressed: () => Navigator.of(context).pop(),
+                  onPressed: () => Navigator.of(dialogContext).pop(),
                   style: TextButton.styleFrom(
                     padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                   ),
@@ -297,14 +297,14 @@ class SettingsDetailScreen extends StatelessWidget {
 
                     if (password.isEmpty) {
                       ModernSnackBar.show(
-                        context,
+                        stfContext,
                         'Please enter your password to confirm',
                         type: SnackBarType.warning,
                       );
                       return;
                     }
 
-                    Navigator.of(context).pop();
+                    Navigator.of(dialogContext).pop();
                     _deleteAccount(context, password);
                   },
                   style: ElevatedButton.styleFrom(
@@ -437,71 +437,20 @@ class SettingsDetailScreen extends StatelessWidget {
 
       if (context.mounted) {
         // Show specific error message
-        String errorTitle;
         String errorMessage;
 
         if (e.code == 'wrong-password' || e.code == 'invalid-credential') {
-          errorTitle = 'Wrong Password';
           errorMessage =
               'The password you entered is incorrect. Please try again.';
         } else if (e.code == 'too-many-requests') {
-          errorTitle = 'Too Many Attempts';
           errorMessage =
               'You have made too many failed attempts. Please try again later.';
         } else {
-          errorTitle = 'Authentication Error';
           errorMessage =
               e.message ?? 'An error occurred during authentication.';
         }
 
-        // Show error dialog
-        showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-              title: Row(
-                children: [
-                  Icon(Icons.error_outline, color: Colors.red, size: 28),
-                  SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      errorTitle,
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.red,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              content: Text(
-                errorMessage,
-                style: TextStyle(fontSize: 15, color: Colors.black87),
-              ),
-              actions: [
-                ElevatedButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.red,
-                    foregroundColor: Colors.white,
-                    padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                  child: Text(
-                    'OK',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                  ),
-                ),
-              ],
-            );
-          },
-        );
+        ModernSnackBar.show(context, errorMessage, type: SnackBarType.error);
       }
     } catch (e) {
       // Close loading dialog using its own context
