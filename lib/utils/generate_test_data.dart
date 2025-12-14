@@ -40,7 +40,7 @@ class GenerateTestData {
         'description':
             'Enjoy a peaceful flight in our classic rainbow-colored hot air balloon. Perfect for families and first-time flyers.',
         'imageUrl':
-            'https://images.unsplash.com/photo-1507608616759-54f48f0af0ee?w=800',
+        'https://d3rr2gvhjw0wwy.cloudfront.net/uploads/activity_galleries/135009/2000x2000-0-70-b8f41c97cd7fa7379c383e6fdf19629d.jpg',
         'departureDate': Timestamp.fromDate(
           DateTime.now().add(Duration(days: 7)),
         ),
@@ -70,7 +70,7 @@ class GenerateTestData {
         'description':
             'Experience luxury in our golden balloon with champagne service and premium comfort.',
         'imageUrl':
-            'https://images.unsplash.com/photo-1501594907352-04cda38ebc29?w=800',
+            'https://f6d3w8j9.rocketcdn.me/wp-content/uploads/2023/05/baloon1.jpeg',
         'departureDate': Timestamp.fromDate(
           DateTime.now().add(Duration(days: 10)),
         ),
@@ -100,7 +100,7 @@ class GenerateTestData {
         'description':
             'Perfect for couples! Enjoy a romantic evening flight with stunning sunset views.',
         'imageUrl':
-            'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=800',
+            'https://cdn.getyourguide.com/img/tour/6447531509b14.jpeg/148.jpg',
         'departureDate': Timestamp.fromDate(
           DateTime.now().add(Duration(days: 14)),
         ),
@@ -130,7 +130,7 @@ class GenerateTestData {
         'description':
             'For the adventurous! Higher altitude flights with extended duration.',
         'imageUrl':
-            'https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=800',
+            'https://sunrise-tours.co.uk/Images/uploads/Hot-Air-Balloon-Luxor1(1).png',
         'departureDate': Timestamp.fromDate(
           DateTime.now().add(Duration(days: 21)),
         ),
@@ -160,7 +160,7 @@ class GenerateTestData {
         'description':
             'Special family package with kid-friendly activities and safety features.',
         'imageUrl':
-            'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800',
+            'https://res.klook.com/images/fl_lossy.progressive,q_65/c_fill,w_1295,h_862/w_80,x_15,y_15,g_south_west,l_Klook_water_br_trans_yhcmh3/activities/xoc0qkxcdrroprcipn5s/LuxurySunriseBalloonRideinLuxorwithHotelPickup.jpg',
         'departureDate': Timestamp.fromDate(
           DateTime.now().add(Duration(days: 5)),
         ),
