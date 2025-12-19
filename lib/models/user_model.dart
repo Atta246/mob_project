@@ -7,6 +7,7 @@ class UserModel {
   final String? username;
   final String? phoneNumber;
   final String? profileImageUrl;
+  final String role;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -17,6 +18,7 @@ class UserModel {
     this.username,
     this.phoneNumber,
     this.profileImageUrl,
+    this.role = 'user',
     required this.createdAt,
     required this.updatedAt,
   });
@@ -31,6 +33,7 @@ class UserModel {
       username: data['username'],
       phoneNumber: data['phoneNumber'],
       profileImageUrl: data['profileImageUrl'],
+      role: data['role'] ?? 'user',
       createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
       updatedAt: (data['updatedAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
     );
@@ -45,6 +48,7 @@ class UserModel {
       username: data['username'],
       phoneNumber: data['phoneNumber'],
       profileImageUrl: data['profileImageUrl'],
+      role: data['role'] ?? 'user',
       createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
       updatedAt: (data['updatedAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
     );
@@ -58,6 +62,7 @@ class UserModel {
       'username': username,
       'phoneNumber': phoneNumber,
       'profileImageUrl': profileImageUrl,
+      'role': role,
       'createdAt': Timestamp.fromDate(createdAt),
       'updatedAt': Timestamp.fromDate(updatedAt),
     };
@@ -71,6 +76,7 @@ class UserModel {
     String? username,
     String? phoneNumber,
     String? profileImageUrl,
+    String? role,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -81,6 +87,7 @@ class UserModel {
       username: username ?? this.username,
       phoneNumber: phoneNumber ?? this.phoneNumber,
       profileImageUrl: profileImageUrl ?? this.profileImageUrl,
+      role: role ?? this.role,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
@@ -93,5 +100,10 @@ class UserModel {
         username!.isNotEmpty &&
         phoneNumber != null &&
         phoneNumber!.isNotEmpty;
+  }
+
+  // Check if user is admin
+  bool get isAdmin {
+    return role == 'admin';
   }
 }

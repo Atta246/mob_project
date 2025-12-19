@@ -1,10 +1,12 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:mob_project/screens/auth/login_screen.dart';
 import 'package:mob_project/screens/auth/signup_screen.dart';
 import 'package:mob_project/services/auth_service.dart';
 import 'package:mob_project/services/profile_service.dart';
 import 'package:mob_project/screens/test_data_screen.dart';
+import 'package:mob_project/repositories/repositories.dart';
 import '../../widgets/widgets.dart';
 import '../../widgets/common/success_dialog.dart';
 import 'edit_profile_screen.dart';
@@ -12,14 +14,69 @@ import 'change_password_screen.dart';
 import '../home/main_screen.dart';
 import 'package:mob_project/utils/modern_snackbar.dart';
 
-class SettingsDetailScreen extends StatelessWidget {
-  SettingsDetailScreen({super.key});
+class SettingsDetailScreen extends StatefulWidget {
+  const SettingsDetailScreen({super.key});
 
+  @override
+  State<SettingsDetailScreen> createState() => _SettingsDetailScreenState();
+}
+
+class _SettingsDetailScreenState extends State<SettingsDetailScreen> {
   final AuthService _authService = AuthService();
   final ProfileService _profileService = ProfileService();
+  final UserRepository _userRepository = UserRepository();
+  bool _isAdmin = false;
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkAdminStatus();
+  }
+
+  Future<void> _checkAdminStatus() async {
+    try {
+      final currentUser = FirebaseAuth.instance.currentUser;
+      if (currentUser != null) {
+        final user = await _userRepository.getUserById(currentUser.uid);
+        if (mounted) {
+          setState(() {
+            _isAdmin = user?.isAdmin ?? false;
+            _isLoading = false;
+          });
+        }
+      } else {
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return Scaffold(
+        backgroundColor: Colors.grey[100],
+        appBar: AppBar(
+          title: Text('Settings'),
+          backgroundColor: Colors.white,
+          foregroundColor: Colors.black,
+          elevation: 0,
+          centerTitle: true,
+        ),
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
     return Scaffold(
       backgroundColor: Colors.grey[100],
       appBar: AppBar(
@@ -58,18 +115,20 @@ class SettingsDetailScreen extends StatelessWidget {
                 );
               },
             ),
-            SizedBox(height: 20),
-            _buildMenuItem(
-              Icons.science_outlined,
-              'Generate Test Data',
-              Colors.green,
-              () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => TestDataScreen()),
-                );
-              },
-            ),
+            if (_isAdmin) ...[
+              SizedBox(height: 20),
+              _buildMenuItem(
+                Icons.science_outlined,
+                'Generate Test Data',
+                Colors.green,
+                () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => TestDataScreen()),
+                  );
+                },
+              ),
+            ],
             SizedBox(height: 20),
             _buildMenuItem(
               Icons.delete_outline,
@@ -153,6 +212,8 @@ class SettingsDetailScreen extends StatelessWidget {
   Future<void> _showDeleteAccountDialog(BuildContext context) async {
     final passwordController = TextEditingController();
     bool obscurePassword = true;
+    final String? signInProvider = _authService.getUserSignInProvider();
+    final bool isGoogleUser = signInProvider == 'google.com';
 
     return showDialog(
       context: context,
@@ -236,43 +297,45 @@ class SettingsDetailScreen extends StatelessWidget {
                         ],
                       ),
                     ),
-                    SizedBox(height: 16),
-                    Text(
-                      'Enter your password to confirm:',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.black87,
+                    if (!isGoogleUser) ...[
+                      SizedBox(height: 16),
+                      Text(
+                        'Enter your password to confirm:',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.black87,
+                        ),
                       ),
-                    ),
-                    SizedBox(height: 8),
-                    TextField(
-                      controller: passwordController,
-                      obscureText: obscurePassword,
-                      decoration: InputDecoration(
-                        hintText: 'Password',
-                        prefixIcon: Icon(Icons.lock_outline),
-                        suffixIcon: IconButton(
-                          icon: Icon(
-                            obscurePassword
-                                ? Icons.visibility_outlined
-                                : Icons.visibility_off_outlined,
+                      SizedBox(height: 8),
+                      TextField(
+                        controller: passwordController,
+                        obscureText: obscurePassword,
+                        decoration: InputDecoration(
+                          hintText: 'Password',
+                          prefixIcon: Icon(Icons.lock_outline),
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              obscurePassword
+                                  ? Icons.visibility_outlined
+                                  : Icons.visibility_off_outlined,
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                obscurePassword = !obscurePassword;
+                              });
+                            },
                           ),
-                          onPressed: () {
-                            setState(() {
-                              obscurePassword = !obscurePassword;
-                            });
-                          },
-                        ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        contentPadding: EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 14,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          contentPadding: EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 14,
+                          ),
                         ),
                       ),
-                    ),
+                    ],
                   ],
                 ),
               ),
@@ -293,19 +356,23 @@ class SettingsDetailScreen extends StatelessWidget {
                 ),
                 ElevatedButton(
                   onPressed: () {
-                    final password = passwordController.text.trim();
+                    if (!isGoogleUser) {
+                      final password = passwordController.text.trim();
 
-                    if (password.isEmpty) {
-                      ModernSnackBar.show(
-                        stfContext,
-                        'Please enter your password to confirm',
-                        type: SnackBarType.warning,
-                      );
-                      return;
+                      if (password.isEmpty) {
+                        ModernSnackBar.show(
+                          stfContext,
+                          'Please enter your password to confirm',
+                          type: SnackBarType.warning,
+                        );
+                        return;
+                      }
+                      Navigator.of(dialogContext).pop();
+                      _deleteAccount(context, password);
+                    } else {
+                      Navigator.of(dialogContext).pop();
+                      _deleteAccount(context, null);
                     }
-
-                    Navigator.of(dialogContext).pop();
-                    _deleteAccount(context, password);
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.red,
@@ -353,7 +420,7 @@ class SettingsDetailScreen extends StatelessWidget {
     );
   }
 
-  Future<void> _deleteAccount(BuildContext context, String password) async {
+  Future<void> _deleteAccount(BuildContext context, String? password) async {
     BuildContext? loadingContext;
 
     // Show loading indicator
@@ -393,13 +460,32 @@ class SettingsDetailScreen extends StatelessWidget {
         throw Exception('No user logged in');
       }
 
-      // Create credential and re-authenticate
-      final credential = EmailAuthProvider.credential(
-        email: user.email!,
-        password: password,
-      );
-
-      await user.reauthenticateWithCredential(credential);
+      if (password != null) {
+        // Create credential and re-authenticate for email/password
+        final credential = EmailAuthProvider.credential(
+          email: user.email!,
+          password: password,
+        );
+        await user.reauthenticateWithCredential(credential);
+      } else {
+        // Re-authenticate for Google
+        final GoogleSignIn googleSignIn = GoogleSignIn();
+        final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
+        if (googleUser != null) {
+          final GoogleSignInAuthentication googleAuth =
+              await googleUser.authentication;
+          final AuthCredential credential = GoogleAuthProvider.credential(
+            accessToken: googleAuth.accessToken,
+            idToken: googleAuth.idToken,
+          );
+          await user.reauthenticateWithCredential(credential);
+        } else {
+          throw FirebaseAuthException(
+            code: 'cancelled',
+            message: 'Google Sign In cancelled',
+          );
+        }
+      }
 
       // Now delete the account
       await _profileService.deleteAccount();
@@ -445,6 +531,8 @@ class SettingsDetailScreen extends StatelessWidget {
         } else if (e.code == 'too-many-requests') {
           errorMessage =
               'You have made too many failed attempts. Please try again later.';
+        } else if (e.code == 'cancelled') {
+          errorMessage = 'Account deletion cancelled.';
         } else {
           errorMessage =
               e.message ?? 'An error occurred during authentication.';
